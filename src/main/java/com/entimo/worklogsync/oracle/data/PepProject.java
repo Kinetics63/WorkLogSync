@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(schema = "PEP", name = "PROJEKT")
-public class Project {
+public class PepProject {
 
   @Id
   @Column(name = "PRJ_ID")

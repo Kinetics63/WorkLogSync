@@ -19,7 +19,7 @@ public class OrcaleService {
  //   List<KstGruppe> rw = this.kstGruppeRepo.findByPerskurz("RW");
  //   rw.forEach(w->log.info(w.toString()));
 
-//    List<Project> proj = this.projectRepo.findAll(Sort.by(Direction.DESC, "id"));
+//    List<JiraProject> proj = this.projectRepo.findAll(Sort.by(Direction.DESC, "id"));
  //   proj.forEach(w->log.info(w.toString()));
   }
 }

@@ -2,7 +2,7 @@ package com.entimo.worklogsync.config;
 
 
 import com.entimo.worklogsync.postgresql.data.JiraIssue;
-import com.entimo.worklogsync.postgresql.data.Project;
+import com.entimo.worklogsync.postgresql.data.JiraProject;
 import com.entimo.worklogsync.postgresql.data.WorkLog;
 
 import java.util.Objects;
@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        basePackageClasses = { Project.class, WorkLog.class, JiraIssue.class},
+        basePackageClasses = { JiraProject.class, WorkLog.class, JiraIssue.class},
         entityManagerFactoryRef = "jiraEntityManagerFactory",
         transactionManagerRef = "jiraTransactionManager"
 )
@@ -35,7 +35,7 @@ public class JiraJpaConfiguration {
             @Qualifier("jiraDataSource") DataSource jiraDataSource) {
         return builder
                 .dataSource(jiraDataSource)
-                .packages(Project.class, WorkLog.class, JiraIssue.class)
+                .packages(JiraProject.class, WorkLog.class, JiraIssue.class)
                 .build();
     }
 
