@@ -37,7 +37,7 @@ public class PostgreSqlService {
             JiraIssue issue = issueOpt.get();
             Optional<JiraProject> projectOpt = projectRepro.findById(Long.valueOf(issue.getProject()));
             if(projectOpt.isPresent()){
-                log.info("user: "+workLog.getAuthor() +" timeWorked:"+ workLog.getTimeworked()+" issue:"+issue.getSummary()+" project:"+projectOpt.get().getPname());
+                log.info("user: "+workLog.getAuthor()+" date: "+ workLog.getStartdate() +" timeWorked:"+ workLog.getTimeworked()+" issue:"+issue.getSummary()+" project:"+projectOpt.get().getPname());
             }
         }
 
