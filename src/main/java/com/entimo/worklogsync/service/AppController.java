@@ -1,17 +1,21 @@
 package com.entimo.worklogsync.service;
 
 
+import com.entimo.worklogsync.oracle.data.PepProject;
 import com.entimo.worklogsync.timer.SyncTimer;
+import java.util.Calendar;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Calendar;
-
-@Controller
+@RestController
+@RequestMapping("/")
 @PropertySource("classpath:application.yml")
 public class AppController {
 
@@ -26,11 +30,18 @@ public class AppController {
 
     @Autowired
     private PostgreSqlService jiraService;
+    @Autowired
+    private OracleService pepService;
 
     @PutMapping("/startSync")
     public String startSync(@RequestParam Integer lastDays) {
         int d = lastDays == null ? 7 : lastDays;
         return "found work log(s) for last " + lastDays + " days: " + jiraService.loadWorkLog(d);
+    }
+
+    @GetMapping("/userProjects")
+    public List<PepProject> userProjects(@RequestParam String persKurz) {
+        return pepService.loadPepProjectsForUser(persKurz);
     }
 
     @PutMapping("/startTimer")
