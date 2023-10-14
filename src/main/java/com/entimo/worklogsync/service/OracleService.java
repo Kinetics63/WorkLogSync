@@ -1,0 +1,32 @@
+package com.entimo.worklogsync.service;
+
+import com.entimo.worklogsync.oracle.data.KstGruppeRepository;
+import com.entimo.worklogsync.oracle.data.PepProject;
+import com.entimo.worklogsync.oracle.data.PepProjectRepository;
+import java.util.List;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Service;
+
+@Service
+@Log4j2
+public class OracleService {
+
+  private KstGruppeRepository kstGruppeRepo;
+  private PepProjectRepository projectRepo;
+
+  public OracleService(KstGruppeRepository kstGruppeRepo, PepProjectRepository projectRepo) {
+    this.kstGruppeRepo = kstGruppeRepo;
+    this.projectRepo = projectRepo;
+
+    //   List<KstGruppe> rw = this.kstGruppeRepo.findByPerskurz("RW");
+    //   rw.forEach(w->log.info(w.toString()));
+
+//    List<JiraProject> proj = this.projectRepo.findAll(Sort.by(Direction.DESC, "id"));
+    //   proj.forEach(w->log.info(w.toString()));
+  }
+
+  public List<PepProject> loadPepProjectsForUser(String persKurz) {
+    List<PepProject> result = projectRepo.findProjectForUser(persKurz.toUpperCase());
+    return result;
+  }
+}

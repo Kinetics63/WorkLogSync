@@ -20,4 +20,6 @@ public class PepProject {
   private String kurz;
   @Column(name = "PRJ_LANG")
   private String lang;
+  @Column(name = "PRJ_PRJ_PARENT_ID")
+  private String parent;
 }

@@ -26,5 +26,5 @@ spring:
         format_sql: true
         jdbc:
           time_zone: UTC
-    show-sql: false
-startTimerAtStartup: true
+    show-sql: true
+startTimerAtStartup: false
