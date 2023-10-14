@@ -1,16 +1,8 @@
 package com.entimo.worklogsync.service;
 
-import com.entimo.worklogsync.oracle.data.KstGruppe;
 import com.entimo.worklogsync.oracle.data.KstGruppeRepository;
-import com.entimo.worklogsync.oracle.data.Project;
-import com.entimo.worklogsync.oracle.data.ProjectRepository;
-import java.util.List;
+import com.entimo.worklogsync.oracle.data.PepProjectRepository;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.web.config.ProjectingArgumentResolverRegistrar;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,9 +10,9 @@ import org.springframework.stereotype.Service;
 public class OrcaleService {
 
   private KstGruppeRepository kstGruppeRepo;
-  private ProjectRepository projectRepo;
+  private PepProjectRepository projectRepo;
 
-  public OrcaleService(KstGruppeRepository kstGruppeRepo, ProjectRepository projectRepo) {
+  public OrcaleService(KstGruppeRepository kstGruppeRepo, PepProjectRepository projectRepo) {
     this.kstGruppeRepo = kstGruppeRepo;
     this.projectRepo = projectRepo;
 

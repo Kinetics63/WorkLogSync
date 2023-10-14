@@ -1,15 +1,12 @@
 package com.entimo.worklogsync.service;
 
-import com.entimo.worklogsync.postgresql.data.JiraIssue;
-import com.entimo.worklogsync.postgresql.data.JiraIssueRepository;
-import com.entimo.worklogsync.postgresql.data.WorkLog;
-import com.entimo.worklogsync.postgresql.data.WorkLogRepository;
+import com.entimo.worklogsync.postgresql.data.*;
 
-import java.sql.Date;
 import java.time.ZonedDateTime;
 import java.util.List;
 
 import java.util.Optional;
+
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -18,23 +15,30 @@ import org.springframework.stereotype.Service;
 public class PostgreSqlService {
 
     private WorkLogRepository worklogRepro;
+    private JiraProjectRepository projectRepro;
     private JiraIssueRepository issueRepro;
 
-    public PostgreSqlService(WorkLogRepository worklogRepro,JiraIssueRepository issueRepro) {
+    public PostgreSqlService(WorkLogRepository worklogRepro, JiraIssueRepository issueRepro
+            , JiraProjectRepository projectRepro) {
         this.worklogRepro = worklogRepro;
         this.issueRepro = issueRepro;
+        this.projectRepro = projectRepro;
     }
 
     public int loadWorkLog(Integer lastDays) {
         List<WorkLog> rw = this.worklogRepro.findByCreationDate(ZonedDateTime.now().minusDays(lastDays));
-        rw.forEach(w->loadIssue(w.getIssueid()));
+        rw.forEach(w -> loadIssue(w));
         return rw.size();
     }
 
-    private void loadIssue(Long issueid) {
-        Optional<JiraIssue> issueOpt = issueRepro.findById(issueid);
-        if(issueOpt.isPresent()){
-            log.info(issueOpt.get().toString());
+    private void loadIssue(WorkLog workLog) {
+        Optional<JiraIssue> issueOpt = issueRepro.findById(workLog.getIssueid());
+        if (issueOpt.isPresent()) {
+            JiraIssue issue = issueOpt.get();
+            Optional<Project> projectOpt = projectRepro.findById(Long.valueOf(issue.getProject()));
+            if(projectOpt.isPresent()){
+                log.info("user: "+workLog.getAuthor() +" timeWorked:"+ workLog.getTimeworked()+" issue:"+issue.getSummary()+" project:"+projectOpt.get().getPname());
+            }
         }
 
     }
