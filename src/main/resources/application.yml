@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: "worklog-database-sync"
+  datasource:
+    jira:
+      driver-class-name: org.postgresql.Driver
+      hikari:
+        maximumPoolSize: 5
+        connectionTimeout: 20000
+        idleTimeout: 600000
+        maxLifetime: 1800000
+      url: jdbc:postgresql://tibia.entimo.de:5432/jiradb
+      username: postgres
+      password: entimo1
+    pep:
+      driver-class-name: oracle.jdbc.driver.OracleDriver
+      url: jdbc:oracle:thin:@pepe.entimo.de:1521/pep.entimo.de
+      username: system
+      password: manager1
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+    show-sql: false
+startTimerAtStartup: true
