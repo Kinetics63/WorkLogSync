@@ -28,7 +28,7 @@ public class AppController {
     private PostgreSqlService jiraService;
 
     @PutMapping("/startSync")
-    public String startsync(@RequestParam Integer lastDays) {
+    public String startSync(@RequestParam Integer lastDays) {
         int d = lastDays == null ? 7 : lastDays;
         return "found work log(s) for last " + lastDays + " days: " + jiraService.loadWorkLog(d);
     }
