@@ -4,7 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.ZonedDateTime;
+import java.util.List;
 import lombok.Data;
+import jakarta.persistence.Transient;
 
 @Data
 @Entity
@@ -23,4 +25,9 @@ public class WorkLog {
   private ZonedDateTime updated ;
   private ZonedDateTime startdate ;
   private Long timeworked;
+
+  // temporary process information
+  @Transient
+  JiraIssue issue;
+
 }

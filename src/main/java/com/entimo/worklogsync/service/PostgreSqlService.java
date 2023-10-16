@@ -25,21 +25,22 @@ public class PostgreSqlService {
         this.projectRepro = projectRepro;
     }
 
-    public int loadWorkLog(Integer lastDays) {
-        List<WorkLog> rw = this.worklogRepro.findByCreationDate(ZonedDateTime.now().minusDays(lastDays));
-        rw.forEach(w -> loadIssue(w));
-        return rw.size();
+    public List<WorkLog> loadWorkLog(Integer lastDays) {
+        List<WorkLog> workLogs = this.worklogRepro.findByCreationDate(ZonedDateTime.now().minusDays(lastDays));
+        workLogs.forEach(w -> loadIssue(w));
+        return workLogs;
     }
 
     private void loadIssue(WorkLog workLog) {
         Optional<JiraIssue> issueOpt = issueRepro.findById(workLog.getIssueid());
         if (issueOpt.isPresent()) {
             JiraIssue issue = issueOpt.get();
+            workLog.setIssue(issue);
             Optional<JiraProject> projectOpt = projectRepro.findById(Long.valueOf(issue.getProject()));
             if(projectOpt.isPresent()){
+                issue.setJiraProject(projectOpt.get());
                 log.info("user: "+workLog.getAuthor()+" date: "+ workLog.getStartdate() +" timeWorked:"+ workLog.getTimeworked()+" issue:"+issue.getSummary()+" project:"+projectOpt.get().getPname());
             }
         }
-
     }
 }

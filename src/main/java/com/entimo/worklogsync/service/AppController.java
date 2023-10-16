@@ -2,6 +2,7 @@ package com.entimo.worklogsync.service;
 
 
 import com.entimo.worklogsync.oracle.data.PepProject;
+import com.entimo.worklogsync.postgresql.data.WorkLog;
 import com.entimo.worklogsync.timer.SyncTimer;
 import java.util.Calendar;
 import java.util.List;
@@ -36,7 +37,11 @@ public class AppController {
     @PutMapping("/startSync")
     public String startSync(@RequestParam Integer lastDays) {
         int d = lastDays == null ? 7 : lastDays;
-        return "found work log(s) for last " + lastDays + " days: " + jiraService.loadWorkLog(d);
+        List<WorkLog> workLogs = jiraService.loadWorkLog(d);
+
+        //
+        pepService.loadMonthForUser(workLogs);
+        return "found work log(s) for last " + lastDays + " days: " + workLogs.size();
     }
 
     @GetMapping("/userProjects")
