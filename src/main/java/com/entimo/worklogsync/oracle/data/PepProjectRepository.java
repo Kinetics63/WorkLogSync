@@ -14,7 +14,7 @@ public interface PepProjectRepository extends JpaRepository<PepProject, Long> {
           + "from PEP.KST_GRUPPE, PEP.PRJ_MA, PEP.PROJEKT "
           + "where PEP.PROJEKT.PRJ_ID = PEP.PRJ_MA.PRJMA_PRJ_ID "
           + "and PEP.PRJ_MA.PRJMA_KENNUMMER = PEP.KST_GRUPPE.KENNUMMER "
-          + "and PEP.KST_GRUPPE.PERSKURZ=:perskurz",
+          + "and PEP.KST_GRUPPE.PERSKURZ=:perskurz order by PEP.PROJEKT.PRJ_ID desc",
       nativeQuery = true)
   List<PepProject> findProjectForUser(@Param("perskurz") String perskurz);
 }

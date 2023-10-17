@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,23 +43,38 @@ public class OracleService {
 
   public List<PepProject> loadPepProjectsForUser(String persKurz) {
     List<PepProject> result = projectRepo.findProjectForUser(persKurz.toUpperCase());
+    result.forEach(project -> addParent(project));
     return result;
   }
 
-  public void loadMonthForUser(List<WorkLog> workLogs) {
+  private void addParent(PepProject project) {
+    Optional<PepProject> projectOpt = projectRepo.findById(project.getParent());
+    if(projectOpt.isPresent()){
+      project.setParentProject(projectOpt.get());
+    }
+  }
+
+  public void processWorkLogs(List<WorkLog> workLogs) {
     for (WorkLog workLog : workLogs) {
       List<KstGruppe> byPerskurz = kstGruppeRepo.findByPerskurz(workLog.getAuthor().toUpperCase());
-      Long kennummer = byPerskurz.get(0).getKennummer();
-      int month = workLog.getCreated().getMonth().ordinal();
-      int year = workLog.getCreated().getYear();
-      List<IstStunden> byKennummerAndMonth = istStundenRepo.findByKennummerAndMonth(kennummer,
-          month + 1, year);
+      if (byPerskurz.isEmpty()) {
+        log.error("User {} not found in PEP!", workLog.getAuthor());
+      } else {
+        Long kennummer = byPerskurz.get(0).getKennummer();
+        int month = workLog.getCreated().getMonth().ordinal();
+        int year = workLog.getCreated().getYear();
+        List<IstStunden> istStundenList = istStundenRepo.findByKennummerAndMonth(kennummer,
+            month + 1, year);
 
-      // map project from Jira to PEP
+        // if list is null create new object
 
-      // just for the demo
-      setHorsForUAD(workLog, byKennummerAndMonth);
+        // map project from Jira to PEP
 
+        // just for the demo
+        if (workLog.getAuthor().equalsIgnoreCase("rw")) {
+          setHorsForUAD(workLog, istStundenList);
+        }
+      }
     }
   }
 
@@ -68,12 +85,12 @@ public class OracleService {
       Long timeworked = workLog.getTimeworked();
       int day = workLog.getStartdate().getDayOfMonth();
       double v = timeworked / 60.0 / 60.0;
-      setHoursByRelection(day, istStunden, Float.valueOf((float)v));
+      setHoursByReflection(day, istStunden, Float.valueOf((float) v));
     }
 
   }
 
-  private void setHoursByRelection(int day, IstStunden istStunden, Float timeWorked) {
+  private void setHoursByReflection(int day, IstStunden istStunden, Float timeWorked) {
 
     Field field = null;
     try {
@@ -85,8 +102,8 @@ public class OracleService {
             .getDeclaredMethod("setDay" + day, Float.class);
         setDayMethod.setAccessible(true);
         setDayMethod.invoke(istStunden, timeWorked);
+        sumHoursAndSave(istStunden);
       }
-      sumHoursAndSave(istStunden);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     } catch (NoSuchMethodException e) {
@@ -135,7 +152,7 @@ public class OracleService {
 
   private void addDayToSum(IstStunden istStunden, Float dayHours) {
     if (dayHours != null) {
-      istStunden.setSum(istStunden.getSum()+dayHours);
+      istStunden.setSum(istStunden.getSum() + dayHours);
     }
   }
 }

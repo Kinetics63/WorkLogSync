@@ -39,8 +39,7 @@ public class AppController {
         int d = lastDays == null ? 7 : lastDays;
         List<WorkLog> workLogs = jiraService.loadWorkLog(d);
 
-        //
-        pepService.loadMonthForUser(workLogs);
+        pepService.processWorkLogs(workLogs);
         return "found work log(s) for last " + lastDays + " days: " + workLogs.size();
     }
 

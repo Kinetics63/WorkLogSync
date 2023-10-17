@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 
 @Data
@@ -21,5 +22,8 @@ public class PepProject {
   @Column(name = "PRJ_LANG")
   private String lang;
   @Column(name = "PRJ_PRJ_PARENT_ID")
-  private String parent;
+  private Long parent;
+
+  @Transient
+  private PepProject parentProject;
 }

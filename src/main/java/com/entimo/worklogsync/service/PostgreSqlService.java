@@ -17,12 +17,14 @@ public class PostgreSqlService {
     private WorkLogRepository worklogRepro;
     private JiraProjectRepository projectRepro;
     private JiraIssueRepository issueRepro;
+    private JiraComponentRepository componentRepro;
 
     public PostgreSqlService(WorkLogRepository worklogRepro, JiraIssueRepository issueRepro
-            , JiraProjectRepository projectRepro) {
+        , JiraProjectRepository projectRepro, JiraComponentRepository componentRepro) {
         this.worklogRepro = worklogRepro;
         this.issueRepro = issueRepro;
         this.projectRepro = projectRepro;
+        this.componentRepro = componentRepro;
     }
 
     public List<WorkLog> loadWorkLog(Integer lastDays) {
@@ -39,8 +41,15 @@ public class PostgreSqlService {
             Optional<JiraProject> projectOpt = projectRepro.findById(Long.valueOf(issue.getProject()));
             if(projectOpt.isPresent()){
                 issue.setJiraProject(projectOpt.get());
-                log.info("user: "+workLog.getAuthor()+" date: "+ workLog.getStartdate() +" timeWorked:"+ workLog.getTimeworked()+" issue:"+issue.getSummary()+" project:"+projectOpt.get().getPname());
             }
+            if(issue.getComponent()!=null) {
+                Optional<JiraComponent> componentOpt = componentRepro.findById(Long.valueOf(issue.getComponent()));
+                if (componentOpt.isPresent()) {
+                    issue.setJiraComponent(componentOpt.get());
+                }
+            }
+            log.info("USER: "+workLog.getAuthor()+" DATE: "+ workLog.getStartdate() +" TIME: "+ workLog.getTimeworked()+" ISSUE: "+issue.getSummary());
+            log.info("   COMPONENT:"+(issue.getJiraComponent()!=null?issue.getJiraComponent().getName():" ??? ")+"   PROJECT: "+(issue.getJiraProject()!=null?issue.getJiraProject().getPname():" ??? "));
         }
     }
 }

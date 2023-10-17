@@ -33,4 +33,7 @@ public class JiraIssue {
   // temporary process information
   @Transient
   JiraProject jiraProject;
+
+  @Transient
+  JiraComponent jiraComponent;
 }
