@@ -23,69 +23,69 @@ public class IstStunden {
   @Column(name = "ISTU_JAHR")
   private Integer year;
   @Column(name = "ISTU_TAG1")
-  private Integer day1;
+  private Float day1;
   @Column(name = "ISTU_TAG2")
-  private Integer day2;
+  private Float day2;
   @Column(name = "ISTU_TAG3")
-  private Integer day3;
+  private Float day3;
   @Column(name = "ISTU_TAG4")
-  private Integer day4;
+  private Float day4;
   @Column(name = "ISTU_TAG5")
-  private Integer day5;
+  private Float day5;
   @Column(name = "ISTU_TAG6")
-  private Integer day6;
+  private Float day6;
   @Column(name = "ISTU_TAG7")
-  private Integer day7;
+  private Float day7;
   @Column(name = "ISTU_TAG8")
-  private Integer day8;
+  private Float day8;
   @Column(name = "ISTU_TAG9")
-  private Integer day9;
+  private Float day9;
   @Column(name = "ISTU_TAG10")
-  private Integer day10;
+  private Float day10;
   @Column(name = "ISTU_TAG11")
-  private Integer day11;
+  private Float day11;
   @Column(name = "ISTU_TAG12")
-  private Integer day12;
+  private Float day12;
   @Column(name = "ISTU_TAG13")
-  private Integer day13;
+  private Float day13;
   @Column(name = "ISTU_TAG14")
-  private Integer day14;
+  private Float day14;
   @Column(name = "ISTU_TAG15")
-  private Integer day15;
+  private Float day15;
   @Column(name = "ISTU_TAG16")
-  private Integer day16;
+  private Float day16;
   @Column(name = "ISTU_TAG17")
-  private Integer day17;
+  private Float day17;
   @Column(name = "ISTU_TAG18")
-  private Integer day18;
+  private Float day18;
   @Column(name = "ISTU_TAG19")
-  private Integer day19;
+  private Float day19;
   @Column(name = "ISTU_TAG20")
-  private Integer day20;
+  private Float day20;
   @Column(name = "ISTU_TAG21")
-  private Integer day21;
+  private Float day21;
   @Column(name = "ISTU_TAG22")
-  private Integer day22;
+  private Float day22;
   @Column(name = "ISTU_TAG23")
-  private Integer day23;
+  private Float day23;
   @Column(name = "ISTU_TAG24")
-  private Integer day24;
+  private Float day24;
   @Column(name = "ISTU_TAG25")
-  private Integer day25;
+  private Float day25;
   @Column(name = "ISTU_TAG26")
-  private Integer day26;
+  private Float day26;
   @Column(name = "ISTU_TAG27")
-  private Integer day27;
+  private Float day27;
   @Column(name = "ISTU_TAG28")
-  private Integer day28;
+  private Float day28;
   @Column(name = "ISTU_TAG29")
-  private Integer day29;
+  private Float day29;
   @Column(name = "ISTU_TAG30")
-  private Integer day30;
+  private Float day30;
   @Column(name = "ISTU_TAG31")
-  private Integer day31;
+  private Float day31;
   @Column(name = "ISTU_SUM_MONAT")
-  private Integer sum;
+  private Float sum;
   @Column(name = "ISTU_FREIGABE")
   private Integer freigabe;
   @Column(name = "ISTU_LOCKED")

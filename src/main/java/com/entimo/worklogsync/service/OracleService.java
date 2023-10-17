@@ -10,6 +10,7 @@ import com.entimo.worklogsync.postgresql.data.WorkLog;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class OracleService {
 
+  private final DecimalFormat hourFormat = new DecimalFormat("0.00");
   private KstGruppeRepository kstGruppeRepo;
   private PepProjectRepository projectRepo;
   private IstStundenRepository istStundenRepo;
@@ -50,39 +52,90 @@ public class OracleService {
       int year = workLog.getCreated().getYear();
       List<IstStunden> byKennummerAndMonth = istStundenRepo.findByKennummerAndMonth(kennummer,
           month + 1, year);
-      log.info(byKennummerAndMonth.toString());
+
+      // map project from Jira to PEP
+
+      // just for the demo
       setHorsForUAD(workLog, byKennummerAndMonth);
 
     }
   }
 
   private void setHorsForUAD(WorkLog workLog, List<IstStunden> hours) {
-    Optional<IstStunden> first = hours.stream().filter(h -> h.getPrjid()==2341).findFirst();
-    if(first.isPresent()){
+    Optional<IstStunden> first = hours.stream().filter(h -> h.getPrjid() == 2341).findFirst();
+    if (first.isPresent()) {
       IstStunden istStunden = first.get();
       Long timeworked = workLog.getTimeworked();
       int day = workLog.getStartdate().getDayOfMonth();
-      setHoursByRelection(day, istStunden, timeworked/60/60);
+      double v = timeworked / 60.0 / 60.0;
+      setHoursByRelection(day, istStunden, Float.valueOf((float)v));
     }
 
   }
 
-  private void setHoursByRelection(int day, IstStunden istStunden, Long timeWorked) {
+  private void setHoursByRelection(int day, IstStunden istStunden, Float timeWorked) {
 
     Field field = null;
     try {
-      Method[] declaredMethods = istStunden.getClass().getDeclaredMethods();
-      Method declaredMethod = istStunden.getClass().getDeclaredMethod("setDay" + day, Integer.class);
-      declaredMethod.setAccessible(true);
-      declaredMethod.invoke(istStunden,timeWorked.intValue() );
-      // save time
-      istStundenRepo.save(istStunden);
+      Method getDayMethod = istStunden.getClass()
+          .getDeclaredMethod("getDay" + day);
+      Float hours = (Float) getDayMethod.invoke(istStunden);
+      if (hours == null || hours == 0) {
+        Method setDayMethod = istStunden.getClass()
+            .getDeclaredMethod("setDay" + day, Float.class);
+        setDayMethod.setAccessible(true);
+        setDayMethod.invoke(istStunden, timeWorked);
+      }
+      sumHoursAndSave(istStunden);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     } catch (NoSuchMethodException e) {
       throw new RuntimeException(e);
     } catch (InvocationTargetException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  private void sumHoursAndSave(IstStunden istStunden) {
+    istStunden.setSum(Float.valueOf("0"));
+    addDayToSum(istStunden, istStunden.getDay1());
+    addDayToSum(istStunden, istStunden.getDay2());
+    addDayToSum(istStunden, istStunden.getDay3());
+    addDayToSum(istStunden, istStunden.getDay4());
+    addDayToSum(istStunden, istStunden.getDay5());
+    addDayToSum(istStunden, istStunden.getDay6());
+    addDayToSum(istStunden, istStunden.getDay7());
+    addDayToSum(istStunden, istStunden.getDay8());
+    addDayToSum(istStunden, istStunden.getDay9());
+    addDayToSum(istStunden, istStunden.getDay10());
+    addDayToSum(istStunden, istStunden.getDay11());
+    addDayToSum(istStunden, istStunden.getDay12());
+    addDayToSum(istStunden, istStunden.getDay13());
+    addDayToSum(istStunden, istStunden.getDay14());
+    addDayToSum(istStunden, istStunden.getDay15());
+    addDayToSum(istStunden, istStunden.getDay16());
+    addDayToSum(istStunden, istStunden.getDay17());
+    addDayToSum(istStunden, istStunden.getDay18());
+    addDayToSum(istStunden, istStunden.getDay18());
+    addDayToSum(istStunden, istStunden.getDay19());
+    addDayToSum(istStunden, istStunden.getDay20());
+    addDayToSum(istStunden, istStunden.getDay21());
+    addDayToSum(istStunden, istStunden.getDay22());
+    addDayToSum(istStunden, istStunden.getDay23());
+    addDayToSum(istStunden, istStunden.getDay24());
+    addDayToSum(istStunden, istStunden.getDay25());
+    addDayToSum(istStunden, istStunden.getDay26());
+    addDayToSum(istStunden, istStunden.getDay27());
+    addDayToSum(istStunden, istStunden.getDay28());
+    addDayToSum(istStunden, istStunden.getDay29());
+    addDayToSum(istStunden, istStunden.getDay30());
+    addDayToSum(istStunden, istStunden.getDay31());
+    istStundenRepo.save(istStunden);
+  }
+
+  private void addDayToSum(IstStunden istStunden, Float dayHours) {
+    if (dayHours != null) {
+      istStunden.setSum(istStunden.getSum()+dayHours);
     }
   }
 }
