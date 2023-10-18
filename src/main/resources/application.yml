@@ -1,8 +1,10 @@
+server:
+  port: 8089
 spring:
   application:
     name: "worklog-database-sync"
   datasource:
-    jira:
+    jira: # Jira Datasource
       driver-class-name: org.postgresql.Driver
       hikari:
         maximumPoolSize: 5
@@ -12,7 +14,7 @@ spring:
       url: jdbc:postgresql://tibia.entimo.de:5432/jiradb
       username: postgres
       password: entimo1
-    pep:
+    pep: # PEP Datasource
       driver-class-name: oracle.jdbc.driver.OracleDriver
       url: jdbc:oracle:thin:@pepe.entimo.de:1521/pep.entimo.de
       username: system
@@ -27,4 +29,9 @@ spring:
         jdbc:
           time_zone: UTC
     show-sql: false
+# start timer when application starts
 startTimerAtStartup: false
+# sync period in minutes
+timerSyncPeriod: 5
+# number of last days to check for work logs
+lastDays: 21
