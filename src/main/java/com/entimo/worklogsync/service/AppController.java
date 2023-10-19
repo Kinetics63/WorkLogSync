@@ -4,8 +4,11 @@ package com.entimo.worklogsync.service;
 import com.entimo.worklogsync.oracle.data.PepProject;
 import com.entimo.worklogsync.postgresql.data.WorkLog;
 import com.entimo.worklogsync.timer.SyncTimer;
+
 import java.util.Calendar;
 import java.util.List;
+
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
@@ -17,33 +20,55 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Log4j2
 @RequestMapping("/")
 @PropertySource("classpath:application.yml")
 public class AppController {
+    private int daysToScan = 21;
     private int timerSyncPeriod = 5;
-
-    public AppController(Environment env) {
-        String period = env.getProperty("timerSyncPeriod");
-        if ( perioInteger.getInteger(period){
-
-        }
-
-        String b = env.getProperty("startTimerAtStartup");
-        if(Boolean.parseBoolean(b)) {
-            startTimer();
-        }
-    }
-
+    private boolean syncOncePerDay = false;
     private java.util.Timer syncTimer = new java.util.Timer("SyncTimer");
-
     @Autowired
     private PostgreSqlService jiraService;
     @Autowired
     private OracleService pepService;
 
+    public AppController(Environment env) {
+        init(env);
+     }
+
+    private void init(Environment env) {
+
+        String o = env.getProperty("timer.syncOncePerDay");
+        if (Boolean.parseBoolean(o)) {
+            syncOncePerDay=true;
+        }
+        String period = env.getProperty("timer.timerSyncPeriod");
+        if (period != null) {
+            try {
+                timerSyncPeriod = Integer.parseInt(period);
+            } catch (NumberFormatException ex) {
+                // nothing to do
+            }
+        }
+        String b = env.getProperty("timer.startTimerAtStartup");
+        if (Boolean.parseBoolean(b)) {
+            startTimer(timerSyncPeriod);
+        }
+        String days = env.getProperty("daysToScan");
+        if (days != null) {
+            try {
+                daysToScan = Integer.parseInt(days);
+            } catch (NumberFormatException ex) {
+                // nothing to do
+            }
+        }
+     }
+
     @PutMapping("/startSync")
-    public String startSync(@RequestParam Integer lastDays) {
-        int d = lastDays == null ? 7 : lastDays;
+    public String startSync(@RequestParam(required = false) Integer lastDays) {
+        int d = lastDays == null ? daysToScan : lastDays;
+        log.info("Worklog scan of the last {} days started.", daysToScan);
         List<WorkLog> workLogs = jiraService.loadWorkLog(d);
 
         pepService.processWorkLogs(workLogs);
@@ -56,23 +81,30 @@ public class AppController {
     }
 
     @PutMapping("/startTimer")
-    public void startTimer() {
-        Calendar date = Calendar.getInstance();
-        date.set(Calendar.HOUR, 23);
-        date.set(Calendar.MINUTE, 59);
-        date.set(Calendar.SECOND, 59);
-        date.set(Calendar.MILLISECOND, 0);
-//        syncTimer.schedule(
-//                new SyncTimer(this),
-//                date.getTime(),
-//                1000 * 60 * 60 * 24
-//        );
-        syncTimer.schedule(
-            new SyncTimer(this),  1000*5, 1000*60);
+    public void startTimer(@RequestParam(required = false) Integer period) {
+        if (syncOncePerDay) {
+            Calendar date = Calendar.getInstance();
+            date.set(Calendar.HOUR, 23);
+            date.set(Calendar.MINUTE, 59);
+            date.set(Calendar.SECOND, 59);
+            date.set(Calendar.MILLISECOND, 0);
+            syncTimer.schedule(
+                    new SyncTimer(this),
+                    date.getTime(),
+                    1000 * 60 * 60 * 24
+            );
+            log.info("Timer started with sync period of once per day at 12pm.");
+        } else {
+            int p = period != null ? period : timerSyncPeriod;
+            syncTimer.schedule(
+                    new SyncTimer(this), 1000 * 5, 1000 * 60 * p);
+            log.info("Timer started with period of {} minutes", p);
+        }
     }
 
     @PutMapping("/stopTimer")
     public void stopTimer() {
+        log.info("Timer stopped");
         syncTimer.cancel();
     }
 

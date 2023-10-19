@@ -1,5 +1,5 @@
 server:
-  port: 8089
+  port: 8080
 spring:
   application:
     name: "worklog-database-sync"
@@ -29,9 +29,14 @@ spring:
         jdbc:
           time_zone: UTC
     show-sql: false
+
+timer:
 # start timer when application starts
-startTimerAtStartup: false
+  startTimerAtStartup: false
 # sync period in minutes
-timerSyncPeriod: 5
-# number of last days to check for work logs
-lastDays: 21
+  timerSyncPeriod: 1
+# sync only once per day at 12p - the sync period will be ignored
+  syncOncePerDay: false
+
+# number of last days to check for work logs in one scan
+daysToScan: 14

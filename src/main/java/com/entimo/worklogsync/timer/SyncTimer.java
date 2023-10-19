@@ -16,7 +16,7 @@ public class SyncTimer  extends TimerTask {
     }
 
     public void run() {
-        log.info("start sync now!");
+        log.info("Timer controlled sync starts now!");
         controller.startSync(null);
     }
 }
