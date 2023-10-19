@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,8 +20,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/")
 @PropertySource("classpath:application.yml")
 public class AppController {
+    private int timerSyncPeriod = 5;
 
     public AppController(Environment env) {
+        String period = env.getProperty("timerSyncPeriod");
+        if ( perioInteger.getInteger(period){
+
+        }
+
         String b = env.getProperty("startTimerAtStartup");
         if(Boolean.parseBoolean(b)) {
             startTimer();
