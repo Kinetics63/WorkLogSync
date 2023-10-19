@@ -55,11 +55,13 @@ public class AppController {
         date.set(Calendar.MINUTE, 59);
         date.set(Calendar.SECOND, 59);
         date.set(Calendar.MILLISECOND, 0);
+//        syncTimer.schedule(
+//                new SyncTimer(this),
+//                date.getTime(),
+//                1000 * 60 * 60 * 24
+//        );
         syncTimer.schedule(
-                new SyncTimer(this),
-                date.getTime(),
-                1000 * 60 * 60 * 24
-        );
+            new SyncTimer(this),  1000*5, 1000*60);
     }
 
     @PutMapping("/stopTimer")
