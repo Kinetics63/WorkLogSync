@@ -3,10 +3,9 @@ package com.entimo.worklogsync.postgresql.data;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.ZonedDateTime;
-import java.util.List;
-import lombok.Data;
 import jakarta.persistence.Transient;
+import java.time.ZonedDateTime;
+import lombok.Data;
 
 @Data
 @Entity

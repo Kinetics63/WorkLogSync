@@ -91,13 +91,13 @@ public class AppController {
             syncTimer.schedule(
                     new SyncTimer(this),
                     date.getTime(),
-                    1000 * 60 * 60 * 24
+                ((long)1000) * 60 * 60 * 24
             );
             log.info("Timer started with sync period of once per day at 12pm.");
         } else {
             int p = period != null ? period : timerSyncPeriod;
             syncTimer.schedule(
-                    new SyncTimer(this), 1000 * 5, 1000 * 60 * p);
+                    new SyncTimer(this), ((long)1000) * 5, ((long)1000) * 60 * p);
             log.info("Timer started with period of {} minutes", p);
         }
     }

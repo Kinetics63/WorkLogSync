@@ -8,5 +8,5 @@ import org.springframework.data.repository.query.Param;
 public interface IstStundenRepository extends JpaRepository<IstStunden, Long> {
 
   @Query("SELECT wo FROM IstStunden wo WHERE wo.kennummer=:kennummer AND wo.month=:month AND wo.year=:year")
-  List<IstStunden> findByKennummerAndMonth(@Param("kennummer") Long kennummer,@Param("month") Integer month,@Param("year") Integer year);
+  List<IstStunden> findByUserMonthYear(@Param("kennummer") Long kennummer,@Param("month") Integer month,@Param("year") Integer year);
 }

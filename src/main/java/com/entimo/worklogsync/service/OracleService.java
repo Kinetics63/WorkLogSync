@@ -1,5 +1,6 @@
 package com.entimo.worklogsync.service;
 
+import com.entimo.worklogsync.exception.WorkLogSyncException;
 import com.entimo.worklogsync.oracle.data.IstStunden;
 import com.entimo.worklogsync.oracle.data.IstStundenRepository;
 import com.entimo.worklogsync.oracle.data.KstGruppe;
@@ -7,16 +8,12 @@ import com.entimo.worklogsync.oracle.data.KstGruppeRepository;
 import com.entimo.worklogsync.oracle.data.PepProject;
 import com.entimo.worklogsync.oracle.data.PepProjectRepository;
 import com.entimo.worklogsync.postgresql.data.WorkLog;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,25 +30,17 @@ public class OracleService {
     this.kstGruppeRepo = kstGruppeRepo;
     this.projectRepo = projectRepo;
     this.istStundenRepo = istStundenRepo;
-
-    //   List<KstGruppe> rw = this.kstGruppeRepo.findByPerskurz("RW");
-    //   rw.forEach(w->log.info(w.toString()));
-
-//    List<JiraProject> proj = this.projectRepo.findAll(Sort.by(Direction.DESC, "id"));
-    //   proj.forEach(w->log.info(w.toString()));
   }
 
   public List<PepProject> loadPepProjectsForUser(String persKurz) {
     List<PepProject> result = projectRepo.findProjectForUser(persKurz.toUpperCase());
-    result.forEach(project -> addParent(project));
+    result.forEach(this::addParent);
     return result;
   }
 
   private void addParent(PepProject project) {
     Optional<PepProject> projectOpt = projectRepo.findById(project.getParent());
-    if(projectOpt.isPresent()){
-      project.setParentProject(projectOpt.get());
-    }
+    projectOpt.ifPresent(project::setParentProject);
   }
 
   public void processWorkLogs(List<WorkLog> workLogs) {
@@ -63,36 +52,37 @@ public class OracleService {
         Long kennummer = byPerskurz.get(0).getKennummer();
         int month = workLog.getCreated().getMonth().ordinal();
         int year = workLog.getCreated().getYear();
-        List<IstStunden> istStundenList = istStundenRepo.findByKennummerAndMonth(kennummer,
-            month + 1, year);
+        List<IstStunden> istStundenList =
+            istStundenRepo.findByUserMonthYear(kennummer,month + 1, year);
 
-        // if list is null create new object
+        // @ToDo if list is null create new object
 
-        // map project from Jira to PEP
+        // @ToDo collect worklogs per user/day/project
+
+        // @ToDo map project from Jira to PEP
 
         // just for the demo
         if (workLog.getAuthor().equalsIgnoreCase("rw")) {
-          setHorsForUAD(workLog, istStundenList);
+          setHoursForUAD(workLog, istStundenList);
         }
       }
     }
   }
 
-  private void setHorsForUAD(WorkLog workLog, List<IstStunden> hours) {
+  private void setHoursForUAD(WorkLog workLog, List<IstStunden> hours) {
     Optional<IstStunden> first = hours.stream().filter(h -> h.getPrjid() == 2341).findFirst();
     if (first.isPresent()) {
       IstStunden istStunden = first.get();
       Long timeworked = workLog.getTimeworked();
       int day = workLog.getStartdate().getDayOfMonth();
       double v = timeworked / 60.0 / 60.0;
-      setHoursByReflection(day, istStunden, Float.valueOf((float) v));
+      setHoursByReflection(day, istStunden, (float) v);
     }
 
   }
 
   private void setHoursByReflection(int day, IstStunden istStunden, Float timeWorked) {
 
-    Field field = null;
     try {
       Method getDayMethod = istStunden.getClass()
           .getDeclaredMethod("getDay" + day);
@@ -100,16 +90,13 @@ public class OracleService {
       if (hours == null || hours == 0) {
         Method setDayMethod = istStunden.getClass()
             .getDeclaredMethod("setDay" + day, Float.class);
-        setDayMethod.setAccessible(true);
         setDayMethod.invoke(istStunden, timeWorked);
         sumHoursAndSave(istStunden);
+        // @ToDo log summary, collect changes in List
+
       }
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    } catch (NoSuchMethodException e) {
-      throw new RuntimeException(e);
-    } catch (InvocationTargetException e) {
-      throw new RuntimeException(e);
+    } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+      throw new WorkLogSyncException("Reflection problem occurred", e);
     }
   }
 

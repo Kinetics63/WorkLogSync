@@ -29,7 +29,7 @@ public class PostgreSqlService {
 
     public List<WorkLog> loadWorkLog(Integer lastDays) {
         List<WorkLog> workLogs = this.worklogRepro.findByCreationDate(ZonedDateTime.now().minusDays(lastDays));
-        workLogs.forEach(w -> loadIssue(w));
+        workLogs.forEach(this::loadIssue);
         return workLogs;
     }
 
@@ -43,7 +43,7 @@ public class PostgreSqlService {
                 issue.setJiraProject(projectOpt.get());
             }
             if(issue.getComponent()!=null) {
-                Optional<JiraComponent> componentOpt = componentRepro.findById(Long.valueOf(issue.getComponent()));
+                Optional<JiraComponent> componentOpt = componentRepro.findById(issue.getComponent());
                 if (componentOpt.isPresent()) {
                     issue.setJiraComponent(componentOpt.get());
                 }
