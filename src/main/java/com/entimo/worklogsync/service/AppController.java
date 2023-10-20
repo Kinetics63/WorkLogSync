@@ -6,8 +6,15 @@ import com.entimo.worklogsync.postgresql.data.WorkLog;
 import com.entimo.worklogsync.timer.SyncTimer;
 
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
@@ -35,13 +42,13 @@ public class AppController {
 
     public AppController(Environment env) {
         init(env);
-     }
+    }
 
     private void init(Environment env) {
 
         String o = env.getProperty("timer.syncOncePerDay");
         if (Boolean.parseBoolean(o)) {
-            syncOncePerDay=true;
+            syncOncePerDay = true;
         }
         String period = env.getProperty("timer.timerSyncPeriod");
         if (period != null) {
@@ -63,8 +70,14 @@ public class AppController {
                 // nothing to do
             }
         }
-     }
+    }
 
+    @Operation(summary = "Start synchronisation from Jira work logs to PEP.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Information about synchronisation process.",
+                    content = {@Content(mediaType = "application/json")}
+            )
+    })
     @PutMapping("/startSync")
     public String startSync(@RequestParam(required = false) Integer lastDays) {
         int d = lastDays == null ? daysToScan : lastDays;
@@ -75,6 +88,23 @@ public class AppController {
         return "found work log(s) for last " + lastDays + " days: " + workLogs.size();
     }
 
+    /**
+     * just a test
+     *
+     * @return
+     */
+    @GetMapping("/")
+    public Map<String, Object> greeting() {
+        return Collections.singletonMap("message", "Hello, World");
+    }
+
+    @Operation(summary = "Get the projects from PEP assigned to user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Found projects for user.",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PepProject.class))}
+            )
+    })
     @GetMapping("/userProjects")
     public List<PepProject> userProjects(@RequestParam String persKurz) {
         return pepService.loadPepProjectsForUser(persKurz);
@@ -91,13 +121,13 @@ public class AppController {
             syncTimer.schedule(
                     new SyncTimer(this),
                     date.getTime(),
-                ((long)1000) * 60 * 60 * 24
+                    ((long) 1000) * 60 * 60 * 24
             );
             log.info("Timer started with sync period of once per day at 12pm.");
         } else {
             int p = period != null ? period : timerSyncPeriod;
             syncTimer.schedule(
-                    new SyncTimer(this), ((long)1000) * 5, ((long)1000) * 60 * p);
+                    new SyncTimer(this), ((long) 1000) * 5, ((long) 1000) * 60 * p);
             log.info("Timer started with period of {} minutes", p);
         }
     }

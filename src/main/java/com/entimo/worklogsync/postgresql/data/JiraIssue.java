@@ -4,9 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import java.time.ZonedDateTime;
-import java.util.List;
 import lombok.Data;
+
+import java.time.ZonedDateTime;
 
 @Data
 @Entity

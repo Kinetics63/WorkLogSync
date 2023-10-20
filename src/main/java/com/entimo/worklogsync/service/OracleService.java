@@ -11,8 +11,8 @@ import com.entimo.worklogsync.postgresql.data.WorkLog;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class OracleService {
 
+  private 
   private final DecimalFormat hourFormat = new DecimalFormat("0.00");
   private KstGruppeRepository kstGruppeRepo;
   private PepProjectRepository projectRepo;
@@ -61,10 +62,15 @@ public class OracleService {
 
         // @ToDo map project from Jira to PEP
 
+        //
+        SortedMap<String, String> logMap = new TreeMap<>();
+
         // just for the demo
         if (workLog.getAuthor().equalsIgnoreCase("rw")) {
           setHoursForUAD(workLog, istStundenList);
         }
+
+        logMap.forEach((key, value) -> log.info((key+" : "+value)));
       }
     }
   }
@@ -76,12 +82,12 @@ public class OracleService {
       Long timeworked = workLog.getTimeworked();
       int day = workLog.getStartdate().getDayOfMonth();
       double v = timeworked / 60.0 / 60.0;
-      setHoursByReflection(day, istStunden, (float) v);
+      setHoursByReflection(day, istStunden, (float) v, logMap);
     }
 
   }
 
-  private void setHoursByReflection(int day, IstStunden istStunden, Float timeWorked) {
+  private void setHoursByReflection(int day, IstStunden istStunden, Float timeWorked, Map logMap) {
 
     try {
       Method getDayMethod = istStunden.getClass()
@@ -92,7 +98,8 @@ public class OracleService {
             .getDeclaredMethod("setDay" + day, Float.class);
         setDayMethod.invoke(istStunden, timeWorked);
         sumHoursAndSave(istStunden);
-        // @ToDo log summary, collect changes in List
+
+        logMap.put(update, "")
 
       }
     } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {

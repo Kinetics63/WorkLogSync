@@ -29,7 +29,12 @@ spring:
         jdbc:
           time_zone: UTC
     show-sql: false
-
+springdoc:
+  api-docs:
+    path: /api-docs
+    swagger-ui:
+      path: /swagger-ui.html
+      operationsSorter: method
 timer:
 # start timer when application starts
   startTimerAtStartup: false
