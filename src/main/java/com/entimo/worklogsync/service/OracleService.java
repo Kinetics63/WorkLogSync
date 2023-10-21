@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 @Log4j2
 public class OracleService {
 
-  private 
   private final DecimalFormat hourFormat = new DecimalFormat("0.00");
   private KstGruppeRepository kstGruppeRepo;
   private PepProjectRepository projectRepo;
@@ -53,10 +52,10 @@ public class OracleService {
         Long kennummer = byPerskurz.get(0).getKennummer();
         int month = workLog.getCreated().getMonth().ordinal();
         int year = workLog.getCreated().getYear();
-        List<IstStunden> istStundenList =
+        List<IstStunden> pepIstStundenList =
             istStundenRepo.findByUserMonthYear(kennummer,month + 1, year);
 
-        // @ToDo if list is null create new object
+        // @ToDo if list is null create new object - depends on project
 
         // @ToDo collect worklogs per user/day/project
 
@@ -67,7 +66,7 @@ public class OracleService {
 
         // just for the demo
         if (workLog.getAuthor().equalsIgnoreCase("rw")) {
-          setHoursForUAD(workLog, istStundenList);
+          setHoursForUAD(workLog, pepIstStundenList, logMap);
         }
 
         logMap.forEach((key, value) -> log.info((key+" : "+value)));
@@ -75,20 +74,21 @@ public class OracleService {
     }
   }
 
-  private void setHoursForUAD(WorkLog workLog, List<IstStunden> hours) {
-    Optional<IstStunden> first = hours.stream().filter(h -> h.getPrjid() == 2341).findFirst();
+  private void setHoursForUAD(WorkLog workLog, List<IstStunden> pepHours, Map<String, String> logMap) {
+    Optional<IstStunden> first = pepHours.stream().filter(h -> h.getPrjid() == 2341).findFirst();
     if (first.isPresent()) {
       IstStunden istStunden = first.get();
       Long timeworked = workLog.getTimeworked();
       int day = workLog.getStartdate().getDayOfMonth();
       double v = timeworked / 60.0 / 60.0;
-      setHoursByReflection(day, istStunden, (float) v, logMap);
+      setHoursByReflection(workLog.getAuthor(), day, istStunden, (float) v, logMap);
     }
 
   }
 
-  private void setHoursByReflection(int day, IstStunden istStunden, Float timeWorked, Map logMap) {
+  private void setHoursByReflection(String user, int day, IstStunden istStunden, Float timeWorked, Map<String,String> logMap) {
 
+    String logStr = user+" -> Month/Day: "+istStunden.getMonth()+"/"+day+ "  hours: "+ timeWorked;
     try {
       Method getDayMethod = istStunden.getClass()
           .getDeclaredMethod("getDay" + day);
@@ -99,8 +99,10 @@ public class OracleService {
         setDayMethod.invoke(istStunden, timeWorked);
         sumHoursAndSave(istStunden);
 
-        logMap.put(update, "")
+        logMap.put("update", logStr);
 
+      }else{
+        logMap.put("not updated", logStr);
       }
     } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
       throw new WorkLogSyncException("Reflection problem occurred", e);

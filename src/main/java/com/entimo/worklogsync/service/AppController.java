@@ -85,7 +85,9 @@ public class AppController {
         List<WorkLog> workLogs = jiraService.loadWorkLog(d);
 
         pepService.processWorkLogs(workLogs);
-        return "found work log(s) for last " + lastDays + " days: " + workLogs.size();
+        String msg = "Found "+ workLogs.size()+" work log(s) for last " + lastDays + " days.";
+        log.info(msg);
+        return msg;
     }
 
     /**
