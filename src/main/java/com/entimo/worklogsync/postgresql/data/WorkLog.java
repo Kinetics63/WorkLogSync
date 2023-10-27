@@ -29,4 +29,10 @@ public class WorkLog {
   @Transient
   JiraIssue issue;
 
+  public Long getJiraProjectId(){
+    return issue.getProject();
+  }
+  public String uniqueString(){
+    return author+"_"+(getStartdate().getDayOfMonth()+1)+"_"+getStartdate().getMonth()+"_"+getStartdate().getYear()+"_"+issue.getProject();
+  }
 }

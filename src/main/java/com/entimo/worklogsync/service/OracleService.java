@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.*;
 
+import com.entimo.worklogsync.utile.WorkLogEntry;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -43,45 +44,39 @@ public class OracleService {
     projectOpt.ifPresent(project::setParentProject);
   }
 
-  public void processWorkLogs(List<WorkLog> workLogs) {
-    for (WorkLog workLog : workLogs) {
-      List<KstGruppe> byPerskurz = kstGruppeRepo.findByPerskurz(workLog.getAuthor().toUpperCase());
+  public void processWorkLogs(Map<String, WorkLogEntry> workLogs) {
+    workLogs.forEach(this::processWorkLog);
+  }
+
+  private void processWorkLog(String s, WorkLogEntry workLogEntry) {
+      List<KstGruppe> byPerskurz = kstGruppeRepo.findByPerskurz(workLogEntry.getAuthor().toUpperCase());
       if (byPerskurz.isEmpty()) {
-        log.error("User {} not found in PEP!", workLog.getAuthor());
+        log.error("User {} not found in PEP!", workLogEntry.getAuthor());
       } else {
         Long kennummer = byPerskurz.get(0).getKennummer();
-        int month = workLog.getCreated().getMonth().ordinal();
-        int year = workLog.getCreated().getYear();
         List<IstStunden> pepIstStundenList =
-            istStundenRepo.findByUserMonthYear(kennummer,month + 1, year);
+                istStundenRepo.findByUserMonthYear(kennummer,workLogEntry.getMonth(), workLogEntry.getYear());
 
         // @ToDo if list is null create new object - depends on project
 
-        // @ToDo collect worklogs per user/day/project
-
-        // @ToDo map project from Jira to PEP
 
         //
         SortedMap<String, String> logMap = new TreeMap<>();
 
         // just for the demo
-        if (workLog.getAuthor().equalsIgnoreCase("rw")) {
-          setHoursForUAD(workLog, pepIstStundenList, logMap);
+        if (workLogEntry.getAuthor().equalsIgnoreCase("rw")) {
+          setHoursForUAD(workLogEntry, pepIstStundenList, logMap);
         }
 
         logMap.forEach((key, value) -> log.info((key+" : "+value)));
       }
-    }
   }
 
-  private void setHoursForUAD(WorkLog workLog, List<IstStunden> pepHours, Map<String, String> logMap) {
+  private void setHoursForUAD(WorkLogEntry workLogEntry, List<IstStunden> pepHours, Map<String, String> logMap) {
     Optional<IstStunden> first = pepHours.stream().filter(h -> h.getPrjid() == 2341).findFirst();
     if (first.isPresent()) {
       IstStunden istStunden = first.get();
-      Long timeworked = workLog.getTimeworked();
-      int day = workLog.getStartdate().getDayOfMonth();
-      double v = timeworked / 60.0 / 60.0;
-      setHoursByReflection(workLog.getAuthor(), day, istStunden, (float) v, logMap);
+      setHoursByReflection(workLogEntry.getAuthor(), workLogEntry.getDay(), istStunden, workLogEntry.getHours(), logMap);
     }
 
   }

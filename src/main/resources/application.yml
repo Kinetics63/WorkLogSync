@@ -28,7 +28,7 @@ spring:
         format_sql: true
         jdbc:
           time_zone: UTC
-    show-sql: false
+    show-sql: true
 springdoc:
   api-docs:
     path: /api-docs

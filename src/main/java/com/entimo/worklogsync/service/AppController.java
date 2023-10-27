@@ -2,6 +2,7 @@ package com.entimo.worklogsync.service;
 
 
 import com.entimo.worklogsync.oracle.data.PepProject;
+import com.entimo.worklogsync.postgresql.data.JiraProject;
 import com.entimo.worklogsync.postgresql.data.WorkLog;
 import com.entimo.worklogsync.timer.SyncTimer;
 
@@ -10,6 +11,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import com.entimo.worklogsync.utile.ProjectUtil;
+import com.entimo.worklogsync.utile.WorkLogEntry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,12 +38,13 @@ public class AppController {
     private int timerSyncPeriod = 5;
     private boolean syncOncePerDay = false;
     private java.util.Timer syncTimer = new java.util.Timer("SyncTimer");
-    @Autowired
     private PostgreSqlService jiraService;
-    @Autowired
     private OracleService pepService;
+    private ProjectUtil projectUtil;
 
-    public AppController(Environment env) {
+    public AppController(PostgreSqlService jiraService, OracleService pepService, Environment env) {
+        this.jiraService = jiraService;
+        this.pepService = pepService;
         init(env);
     }
 
@@ -70,6 +74,12 @@ public class AppController {
                 // nothing to do
             }
         }
+
+        projectUtil = new ProjectUtil();
+        projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.CLASSIC));
+        projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.SHARED));
+        projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.NEXTGEN));
+        // @TODO load PEP equivalent
     }
 
     @Operation(summary = "Start synchronisation from Jira work logs to PEP.")
@@ -82,10 +92,12 @@ public class AppController {
     public String startSync(@RequestParam(required = false) Integer lastDays) {
         int d = lastDays == null ? daysToScan : lastDays;
         log.info("Worklog scan of the last {} days started.", daysToScan);
-        List<WorkLog> workLogs = jiraService.loadWorkLog(d);
+        Map<String, WorkLogEntry> workLogEntries = jiraService.loadWorkLog(d);
 
-        pepService.processWorkLogs(workLogs);
-        String msg = "Found "+ workLogs.size()+" work log(s) for last " + lastDays + " days.";
+        //@TODO find pepProject for each JiraProject
+
+        pepService.processWorkLogs(workLogEntries);
+        String msg = "Found "+ workLogEntries.size()+" work log(s) for last " + lastDays + " days.";
         log.info(msg);
         return msg;
     }

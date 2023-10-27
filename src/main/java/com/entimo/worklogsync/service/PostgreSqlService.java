@@ -3,10 +3,13 @@ package com.entimo.worklogsync.service;
 import com.entimo.worklogsync.postgresql.data.*;
 
 import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
 
+import java.util.Map;
 import java.util.Optional;
 
+import com.entimo.worklogsync.utile.WorkLogEntry;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
@@ -27,10 +30,31 @@ public class PostgreSqlService {
         this.componentRepro = componentRepro;
     }
 
-    public List<WorkLog> loadWorkLog(Integer lastDays) {
+    public JiraProject loadProject(String name){
+        List<JiraProject> proj = projectRepro.findByProjectName(name);
+        if(proj.size()==1){
+            return proj.get(0);
+        }
+        return null;
+    }
+
+    public Map<String, WorkLogEntry> loadWorkLog(Integer lastDays) {
         List<WorkLog> workLogs = this.worklogRepro.findByCreationDate(ZonedDateTime.now().minusDays(lastDays));
         workLogs.forEach(this::loadIssue);
-        return workLogs;
+        Map<String, WorkLogEntry> logMap = new HashMap<>();
+        workLogs.forEach(wl -> cumulateHours(wl, logMap));
+        return logMap;
+    }
+
+    private void cumulateHours(WorkLog workLog, Map<String, WorkLogEntry> logMap) {
+        if(logMap.containsKey(workLog.uniqueString())){
+            WorkLogEntry workLogEntry = logMap.get(workLog.uniqueString());
+            double v = workLog.getTimeworked() / 60.0 / 60.0;
+            workLogEntry.setHours(workLogEntry.getHours() + (float)v);
+        }else{
+            WorkLogEntry workLogEntry = new WorkLogEntry(workLog);
+            logMap.put(workLog.uniqueString(), workLogEntry);
+        }
     }
 
     private void loadIssue(WorkLog workLog) {

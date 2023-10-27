@@ -17,7 +17,7 @@ public class JiraIssue {
   private Long id;
   private String pkey;
   private Integer issuenum;
-  private Integer project;
+  private Long project;
   private String reporter;
   private String assignee;
   private String creator;
