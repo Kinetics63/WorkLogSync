@@ -41,11 +41,12 @@ public class PostgreSqlService {
         workLogs.forEach(wl -> cumulateHours(wl, logMap));
 
         // log found jira projects
-        Set<String> set = new TreeSet<>();
-        workLogs.forEach(w -> set.add(w.getJiraProjectName()));
-        log.debug("found jira projects:");
-        set.forEach(s -> log.info("   "+s));
-
+        if (log.isDebugEnabled()) {
+            Set<String> set = new TreeSet<>();
+            workLogs.forEach(w -> set.add(w.getJiraProjectName()));
+            log.debug("found jira projects:");
+            set.forEach(s -> log.info("   " + s));
+        }
         return logMap;
     }
 

@@ -93,9 +93,11 @@ public class AppController {
         log.info("Worklog scan of the last {} days started.", d);
         Map<String, WorkLogEntry> workLogEntries = jiraService.loadWorkLog(d);
 
-        workLogEntries.forEach(pepService::processWorkLog);
         String msg = "Found "+ workLogEntries.size()+" work log(s) for last " + d + " days.";
         log.info(msg);
+
+        workLogEntries.forEach(pepService::processWorkLog);
+
         return msg;
     }
 
