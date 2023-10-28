@@ -76,10 +76,9 @@ public class AppController {
         }
 
         projectUtil = new ProjectUtil();
-        projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.CLASSIC));
-        projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.SHARED));
-        projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.NEXTGEN));
-        // @TODO load PEP equivalent
+        projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.JIRA_CLASSIC));
+        projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.JIRA_SHARED));
+        projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.JIRA_NEXTGEN));
     }
 
     @Operation(summary = "Start synchronisation from Jira work logs to PEP.")
@@ -94,9 +93,7 @@ public class AppController {
         log.info("Worklog scan of the last {} days started.", daysToScan);
         Map<String, WorkLogEntry> workLogEntries = jiraService.loadWorkLog(d);
 
-        //@TODO find pepProject for each JiraProject
-
-        pepService.processWorkLogs(workLogEntries);
+        workLogEntries.forEach(pepService::processWorkLog);
         String msg = "Found "+ workLogEntries.size()+" work log(s) for last " + lastDays + " days.";
         log.info(msg);
         return msg;

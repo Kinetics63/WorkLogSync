@@ -8,6 +8,7 @@ import com.entimo.worklogsync.oracle.data.KstGruppeRepository;
 import com.entimo.worklogsync.oracle.data.PepProject;
 import com.entimo.worklogsync.oracle.data.PepProjectRepository;
 import com.entimo.worklogsync.postgresql.data.WorkLog;
+import com.entimo.worklogsync.utile.ProjectUtil;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
@@ -34,7 +35,7 @@ public class OracleService {
   }
 
   public List<PepProject> loadPepProjectsForUser(String persKurz) {
-    List<PepProject> result = projectRepo.findProjectForUser(persKurz.toUpperCase());
+    List<PepProject> result = projectRepo.findProjectForUser(persKurz);
     result.forEach(this::addParent);
     return result;
   }
@@ -44,15 +45,16 @@ public class OracleService {
     projectOpt.ifPresent(project::setParentProject);
   }
 
-  public void processWorkLogs(Map<String, WorkLogEntry> workLogs) {
-    workLogs.forEach(this::processWorkLog);
-  }
-
-  private void processWorkLog(String s, WorkLogEntry workLogEntry) {
+  public void processWorkLog(String s, WorkLogEntry workLogEntry) {
       List<KstGruppe> byPerskurz = kstGruppeRepo.findByPerskurz(workLogEntry.getAuthor().toUpperCase());
       if (byPerskurz.isEmpty()) {
         log.error("User {} not found in PEP!", workLogEntry.getAuthor());
       } else {
+        //find pepProject for JiraProject
+        List<PepProject> pepProjects = projectRepo.loadProjectForUser(workLogEntry.getAuthor(),
+            ProjectUtil.mapJiraToPep(workLogEntry.getJiraProjectName()));
+
+
         Long kennummer = byPerskurz.get(0).getKennummer();
         List<IstStunden> pepIstStundenList =
                 istStundenRepo.findByUserMonthYear(kennummer,workLogEntry.getMonth(), workLogEntry.getYear());

@@ -9,6 +9,7 @@ public class WorkLogEntry {
     private String author;
 
     private Long jiraProjectId;
+    private String jiraProjectName;
     private Long pepProjectId;
 
     private Float hours;
@@ -20,6 +21,7 @@ public class WorkLogEntry {
     public WorkLogEntry(WorkLog workLog) {
         author = workLog.getAuthor();
         jiraProjectId = workLog.getJiraProjectId();
+        jiraProjectName = workLog.getIssue().getJiraProject().getPname();
         hours = workLog.getTimeworked() / (float) 60.0 / (float) 60.0;
         year = workLog.getStartdate().getYear();
         month = workLog.getStartdate().getMonthValue();
