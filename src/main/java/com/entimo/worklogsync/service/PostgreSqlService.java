@@ -3,11 +3,7 @@ package com.entimo.worklogsync.service;
 import com.entimo.worklogsync.postgresql.data.*;
 
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.List;
-
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import com.entimo.worklogsync.utile.WorkLogEntry;
 import lombok.extern.log4j.Log4j2;
@@ -23,16 +19,16 @@ public class PostgreSqlService {
     private JiraComponentRepository componentRepro;
 
     public PostgreSqlService(WorkLogRepository worklogRepro, JiraIssueRepository issueRepro
-        , JiraProjectRepository projectRepro, JiraComponentRepository componentRepro) {
+            , JiraProjectRepository projectRepro, JiraComponentRepository componentRepro) {
         this.worklogRepro = worklogRepro;
         this.issueRepro = issueRepro;
         this.projectRepro = projectRepro;
         this.componentRepro = componentRepro;
     }
 
-    public JiraProject loadProject(String name){
+    public JiraProject loadProject(String name) {
         List<JiraProject> proj = projectRepro.findByProjectName(name);
-        if(proj.size()==1){
+        if (proj.size() == 1) {
             return proj.get(0);
         }
         return null;
@@ -43,15 +39,22 @@ public class PostgreSqlService {
         workLogs.forEach(this::loadIssue);
         Map<String, WorkLogEntry> logMap = new HashMap<>();
         workLogs.forEach(wl -> cumulateHours(wl, logMap));
+
+        // log found jira projects
+        Set<String> set = new TreeSet<>();
+        workLogs.forEach(w -> set.add(w.getJiraProjectName()));
+        log.info("found jira projects:");
+        set.forEach(s -> log.info("   "+s));
+
         return logMap;
     }
 
     private void cumulateHours(WorkLog workLog, Map<String, WorkLogEntry> logMap) {
-        if(logMap.containsKey(workLog.uniqueString())){
+        if (logMap.containsKey(workLog.uniqueString())) {
             WorkLogEntry workLogEntry = logMap.get(workLog.uniqueString());
             double v = workLog.getTimeworked() / 60.0 / 60.0;
-            workLogEntry.setHours(workLogEntry.getHours() + (float)v);
-        }else{
+            workLogEntry.setHours(workLogEntry.getHours() + (float) v);
+        } else {
             WorkLogEntry workLogEntry = new WorkLogEntry(workLog);
             logMap.put(workLog.uniqueString(), workLogEntry);
         }
@@ -63,17 +66,17 @@ public class PostgreSqlService {
             JiraIssue issue = issueOpt.get();
             workLog.setIssue(issue);
             Optional<JiraProject> projectOpt = projectRepro.findById(Long.valueOf(issue.getProject()));
-            if(projectOpt.isPresent()){
+            if (projectOpt.isPresent()) {
                 issue.setJiraProject(projectOpt.get());
             }
-            if(issue.getComponent()!=null) {
+            if (issue.getComponent() != null) {
                 Optional<JiraComponent> componentOpt = componentRepro.findById(issue.getComponent());
                 if (componentOpt.isPresent()) {
                     issue.setJiraComponent(componentOpt.get());
                 }
             }
-            log.info("USER: "+workLog.getAuthor()+" DATE: "+ workLog.getStartdate() +" TIME: "+ workLog.getTimeworked()+" ISSUE: "+issue.getSummary());
-            log.info("   COMPONENT:"+(issue.getJiraComponent()!=null?issue.getJiraComponent().getName():" ??? ")+"   PROJECT: "+(issue.getJiraProject()!=null?issue.getJiraProject().getPname():" ??? "));
+//            log.info("USER: " + workLog.getAuthor() + " DATE: " + workLog.getStartdate() + " TIME: " + workLog.getTimeworked() + " ISSUE: " + issue.getSummary());
+//            log.info("   COMPONENT:" + (issue.getJiraComponent() != null ? issue.getJiraComponent().getName() : " ??? ") + "   PROJECT: " + (issue.getJiraProject() != null ? issue.getJiraProject().getPname() : " ??? "));
         }
     }
 }

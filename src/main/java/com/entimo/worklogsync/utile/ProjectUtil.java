@@ -1,13 +1,16 @@
 package com.entimo.worklogsync.utile;
 
-import com.entimo.worklogsync.exception.WorkLogSyncException;
 import com.entimo.worklogsync.postgresql.data.JiraProject;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class ProjectUtil {
 
+  protected static final Logger log = LogManager.getLogger();
+  public static final String JIRA_WORKLOGS = "Work Logs";
   public static final String JIRA_CLASSIC = "entimICE";
   public static final String JIRA_SHARED = "entimICE Shared";
   public static final String JIRA_NEXTGEN = "entimICE Next Generation";
@@ -35,7 +38,10 @@ public class ProjectUtil {
         return PEP_SHARED;
       case JIRA_NEXTGEN:
         return PEP_NEXTGEN;
+      default:
+//        log.warn("Project {} unknown!", jiraProjectName);
+        break;
     }
-    throw new WorkLogSyncException("Project "+jiraProjectName+" unknown!");
+    return "";
   }
 }

@@ -48,7 +48,7 @@ public class OracleService {
   public void processWorkLog(String s, WorkLogEntry workLogEntry) {
       List<KstGruppe> byPerskurz = kstGruppeRepo.findByPerskurz(workLogEntry.getAuthor().toUpperCase());
       if (byPerskurz.isEmpty()) {
-        log.error("User {} not found in PEP!", workLogEntry.getAuthor());
+       // log.warn("User {} not found in PEP!", workLogEntry.getAuthor());
       } else {
         //find pepProject for JiraProject
         List<PepProject> pepProjects = projectRepo.loadProjectForUser(workLogEntry.getAuthor(),
@@ -78,14 +78,14 @@ public class OracleService {
     Optional<IstStunden> first = pepHours.stream().filter(h -> h.getPrjid() == 2341).findFirst();
     if (first.isPresent()) {
       IstStunden istStunden = first.get();
-      setHoursByReflection(workLogEntry.getAuthor(), workLogEntry.getDay(), istStunden, workLogEntry.getHours(), logMap);
+      setHoursByReflection(workLogEntry.getAuthor(), workLogEntry.getDay(), istStunden, workLogEntry.getHours(), workLogEntry.getJiraProjectName(), logMap);
     }
 
   }
 
-  private void setHoursByReflection(String user, int day, IstStunden istStunden, Float timeWorked, Map<String,String> logMap) {
+  private void setHoursByReflection(String user, int day, IstStunden istStunden, Float timeWorked, String projectName, Map<String,String> logMap) {
 
-    String logStr = user+" -> Month/Day: "+istStunden.getMonth()+"/"+day+ "  hours: "+ timeWorked;
+    String logStr = user+" -> Month/Day: "+istStunden.getMonth()+"/"+day+ "  hours: "+ timeWorked + " project: "+projectName;
     try {
       Method getDayMethod = istStunden.getClass()
           .getDeclaredMethod("getDay" + day);

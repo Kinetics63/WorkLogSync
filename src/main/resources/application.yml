@@ -28,7 +28,7 @@ spring:
         format_sql: true
         jdbc:
           time_zone: UTC
-    show-sql: true
+    show-sql: false
 springdoc:
   api-docs:
     path: /api-docs
@@ -44,4 +44,4 @@ timer:
   syncOncePerDay: false
 
 # number of last days to check for work logs in one scan
-daysToScan: 14
+daysToScan: 21

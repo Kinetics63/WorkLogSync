@@ -90,7 +90,7 @@ public class AppController {
     @PutMapping("/startSync")
     public String startSync(@RequestParam(required = false) Integer lastDays) {
         int d = lastDays == null ? daysToScan : lastDays;
-        log.info("Worklog scan of the last {} days started.", daysToScan);
+        log.info("Worklog scan of the last {} days started.", d);
         Map<String, WorkLogEntry> workLogEntries = jiraService.loadWorkLog(d);
 
         workLogEntries.forEach(pepService::processWorkLog);
