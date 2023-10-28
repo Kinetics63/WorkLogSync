@@ -39,7 +39,7 @@ public class ProjectUtil {
       case JIRA_NEXTGEN:
         return PEP_NEXTGEN;
       default:
-//        log.warn("Project {} unknown!", jiraProjectName);
+        log.debug("Project {} unknown!", jiraProjectName);
         break;
     }
     return "";

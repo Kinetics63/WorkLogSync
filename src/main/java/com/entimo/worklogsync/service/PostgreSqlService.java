@@ -43,7 +43,7 @@ public class PostgreSqlService {
         // log found jira projects
         Set<String> set = new TreeSet<>();
         workLogs.forEach(w -> set.add(w.getJiraProjectName()));
-        log.info("found jira projects:");
+        log.debug("found jira projects:");
         set.forEach(s -> log.info("   "+s));
 
         return logMap;
@@ -75,8 +75,8 @@ public class PostgreSqlService {
                     issue.setJiraComponent(componentOpt.get());
                 }
             }
-//            log.info("USER: " + workLog.getAuthor() + " DATE: " + workLog.getStartdate() + " TIME: " + workLog.getTimeworked() + " ISSUE: " + issue.getSummary());
-//            log.info("   COMPONENT:" + (issue.getJiraComponent() != null ? issue.getJiraComponent().getName() : " ??? ") + "   PROJECT: " + (issue.getJiraProject() != null ? issue.getJiraProject().getPname() : " ??? "));
+            log.debug("USER: " + workLog.getAuthor() + " DATE: " + workLog.getStartdate() + " TIME: " + workLog.getTimeworked() + " ISSUE: " + issue.getSummary());
+            log.debug("   COMPONENT:" + (issue.getJiraComponent() != null ? issue.getJiraComponent().getName() : " ??? ") + "   PROJECT: " + (issue.getJiraProject() != null ? issue.getJiraProject().getPname() : " ??? "));
         }
     }
 }

@@ -35,13 +35,22 @@ springdoc:
     swagger-ui:
       path: /swagger-ui.html
       operationsSorter: method
+logging:
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr(%5p) %clr(---){faint} %clr(%55C{1}[%-4L]){cyan} %clr(:) %m%n"
+  level:
+    root: ERROR
+    com.entimo.worklogsync: INFO
+    org.springframework.boot: ERROR
+    org.springframework.web: ERROR
+    org.hibernate: ERROR
 timer:
 # start timer when application starts
   startTimerAtStartup: false
 # sync period in minutes
-  timerSyncPeriod: 1
+  timerSyncPeriod: 60
 # sync only once per day at 12p - the sync period will be ignored
-  syncOncePerDay: false
+  syncOncePerDay: true
 
 # number of last days to check for work logs in one scan
 daysToScan: 21

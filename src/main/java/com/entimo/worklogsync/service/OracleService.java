@@ -48,7 +48,7 @@ public class OracleService {
   public void processWorkLog(String s, WorkLogEntry workLogEntry) {
       List<KstGruppe> byPerskurz = kstGruppeRepo.findByPerskurz(workLogEntry.getAuthor().toUpperCase());
       if (byPerskurz.isEmpty()) {
-       // log.warn("User {} not found in PEP!", workLogEntry.getAuthor());
+       log.debug("User {} not found in PEP!", workLogEntry.getAuthor());
       } else {
         //find pepProject for JiraProject
         List<PepProject> pepProjects = projectRepo.loadProjectForUser(workLogEntry.getAuthor(),
