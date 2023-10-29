@@ -40,6 +40,8 @@ public class PostgreSqlService {
         Map<String, WorkLogEntry> logMap = new HashMap<>();
         workLogs.forEach(wl -> cumulateHours(wl, logMap));
 
+        log.info("Found {} work logs in JIRA which are cumulated to {} project related user work logs for the last {} days.", workLogs.size(), logMap.size(), lastDays);
+
         // log found jira projects
         if (log.isDebugEnabled()) {
             Set<String> set = new TreeSet<>();

@@ -6,10 +6,7 @@ import com.entimo.worklogsync.postgresql.data.JiraProject;
 import com.entimo.worklogsync.postgresql.data.WorkLog;
 import com.entimo.worklogsync.timer.SyncTimer;
 
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.entimo.worklogsync.utile.ProjectUtil;
 import com.entimo.worklogsync.utile.WorkLogEntry;
@@ -93,12 +90,11 @@ public class AppController {
         log.info("Worklog scan of the last {} days started.", d);
         Map<String, WorkLogEntry> workLogEntries = jiraService.loadWorkLog(d);
 
-        String msg = "Found "+ workLogEntries.size()+" work log(s) for last " + d + " days.";
-        log.info(msg);
+        List<String> logList = new ArrayList<>();
+        workLogEntries.forEach((k,v) -> pepService.processWorkLog(v, logList));
+        logList.forEach(log::info);
 
-        workLogEntries.forEach(pepService::processWorkLog);
-
-        return msg;
+        return "Found "+ workLogEntries.size()+" work log(s) for last " + d + " days.";
     }
 
     /**
@@ -120,6 +116,7 @@ public class AppController {
     })
     @GetMapping("/userProjects")
     public List<PepProject> userProjects(@RequestParam String persKurz) {
+        log.info("load user {} projects from PEP", persKurz);
         return pepService.loadPepProjectsForUser(persKurz);
     }
 
