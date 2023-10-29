@@ -10,7 +10,7 @@ public interface WorkLogRepository extends JpaRepository<WorkLog, Long> {
 
   List<WorkLog> findByAuthor(String author);
 
-  @Query("SELECT wo FROM WorkLog wo WHERE wo.author = :author and wo.created>:creationDate order by wo.startdate")
+  @Query("SELECT wo FROM WorkLog wo WHERE UPPER(wo.author) = UPPER(:author) and wo.created>:creationDate order by wo.startdate")
   List<WorkLog> findByAuthorAndCreationDate(@Param("author") String author,
       @Param("creationDate") ZonedDateTime creationDate);
 
