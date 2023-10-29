@@ -7,6 +7,7 @@ import com.entimo.worklogsync.oracle.data.KstGruppe;
 import com.entimo.worklogsync.oracle.data.KstGruppeRepository;
 import com.entimo.worklogsync.oracle.data.PepProject;
 import com.entimo.worklogsync.oracle.data.PepProjectRepository;
+import com.entimo.worklogsync.postgresql.data.JiraProject;
 import com.entimo.worklogsync.postgresql.data.WorkLog;
 import com.entimo.worklogsync.utile.ProjectUtil;
 
@@ -32,6 +33,14 @@ public class OracleService {
         this.kstGruppeRepo = kstGruppeRepo;
         this.projectRepo = projectRepo;
         this.istStundenRepo = istStundenRepo;
+    }
+
+    public PepProject loadProject(String name) {
+        List<PepProject> proj = projectRepo.findByProjectName(name);
+        if (proj.size() == 1) {
+            return proj.get(0);
+        }
+        return null;
     }
 
     public List<PepProject> loadPepProjectsForUser(String persKurz) {

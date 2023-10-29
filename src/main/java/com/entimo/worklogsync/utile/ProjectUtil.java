@@ -1,5 +1,6 @@
 package com.entimo.worklogsync.utile;
 
+import com.entimo.worklogsync.oracle.data.PepProject;
 import com.entimo.worklogsync.postgresql.data.JiraProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +39,9 @@ public class ProjectUtil {
 
     public void addJiraProject(JiraProject pro) {
         jiraProjects.put(pro.getPname(), pro.getId());
+    }
+    public void addPepProject(PepProject pro) {
+        jiraProjects.put(pro.getKurz()+"/"+pro.getLang(), pro.getId());
     }
 
     public static String mapJiraToPep(String jiraProjectName) {

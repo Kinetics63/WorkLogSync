@@ -35,6 +35,7 @@ springdoc:
     swagger-ui:
       path: /swagger-ui.html
       operationsSorter: method
+
 logging:
   pattern:
     console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr(%5p) %clr(---){faint} %clr(%55C{1}[%-4L]){cyan} %clr(:) %m%n"
@@ -44,6 +45,11 @@ logging:
     org.springframework.boot: ERROR
     org.springframework.web: ERROR
     org.hibernate: ERROR
+
+app:
+  controller:
+    enabled: true
+
 timer:
 # start timer when application starts
   startTimerAtStartup: false

@@ -1,11 +1,16 @@
 package com.entimo.worklogsync.oracle.data;
 
 import java.util.List;
+
+import com.entimo.worklogsync.postgresql.data.JiraProject;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface PepProjectRepository extends JpaRepository<PepProject, Long> {
+
+  @Query("SELECT project FROM PepProject project WHERE UPPER(project.lang) = UPPER(:name)")
+  List<PepProject> findByProjectName(@Param("name") String name);
 
   @Query(
       value = "select PEP.PROJEKT.* "

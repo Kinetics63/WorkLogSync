@@ -16,10 +16,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Log4j2
 @RequestMapping("/")
 @PropertySource("classpath:application.yml")
+@ConditionalOnExpression("${app.controller.enabled:true}")
 public class AppController {
     private int daysToScan = 21;
     private int timerSyncPeriod = 5;
@@ -72,10 +74,14 @@ public class AppController {
             }
         }
 
+        // check projects in Jira as well as in PEP and stop app in case of problems
         projectUtil = new ProjectUtil();
         projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.JIRA_CLASSIC));
         projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.JIRA_SHARED));
         projectUtil.addJiraProject(jiraService.loadProject(ProjectUtil.JIRA_NEXTGEN));
+        projectUtil.addPepProject(pepService.loadProject(ProjectUtil.PEP_CLASSIC));
+        projectUtil.addPepProject(pepService.loadProject(ProjectUtil.PEP_SHARED));
+        projectUtil.addPepProject(pepService.loadProject(ProjectUtil.PEP_NEXTGEN));
     }
 
     @Operation(summary = "Start synchronisation from Jira work logs to PEP.")
@@ -85,10 +91,14 @@ public class AppController {
             )
     })
     @PutMapping("/startSync")
-    public String startSync(@RequestParam(required = false) Integer lastDays) {
+    public String startSync(@RequestParam(required = false) Integer lastDays, @RequestParam(required = false) String user) {
         int d = lastDays == null ? daysToScan : lastDays;
-        log.info("Worklog scan of the last {} days started.", d);
-        Map<String, WorkLogEntry> workLogEntries = jiraService.loadWorkLog(d);
+        if(StringUtils.isNotEmpty(user)){
+            log.info("Worklog scan of the last {} days started for {}.", d, user);
+        }else {
+            log.info("Worklog scan of the last {} days started.", d);
+        }
+        Map<String, WorkLogEntry> workLogEntries = jiraService.loadWorkLog(d, user);
 
         List<String> logList = new ArrayList<>();
         workLogEntries.forEach((k,v) -> pepService.processWorkLog(v, logList));

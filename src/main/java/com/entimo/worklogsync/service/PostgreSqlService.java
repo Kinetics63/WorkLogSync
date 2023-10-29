@@ -7,35 +7,42 @@ import java.util.*;
 
 import com.entimo.worklogsync.utile.WorkLogEntry;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
 @Log4j2
 public class PostgreSqlService {
 
-    private WorkLogRepository worklogRepro;
-    private JiraProjectRepository projectRepro;
-    private JiraIssueRepository issueRepro;
-    private JiraComponentRepository componentRepro;
+    private WorkLogRepository worklogRepo;
+    private JiraProjectRepository projectRepo;
+    private JiraIssueRepository issueRepo;
+    private JiraComponentRepository componentRepo;
 
     public PostgreSqlService(WorkLogRepository worklogRepro, JiraIssueRepository issueRepro
             , JiraProjectRepository projectRepro, JiraComponentRepository componentRepro) {
-        this.worklogRepro = worklogRepro;
-        this.issueRepro = issueRepro;
-        this.projectRepro = projectRepro;
-        this.componentRepro = componentRepro;
+        this.worklogRepo = worklogRepro;
+        this.issueRepo = issueRepro;
+        this.projectRepo = projectRepro;
+        this.componentRepo = componentRepro;
     }
 
     public JiraProject loadProject(String name) {
-        List<JiraProject> proj = projectRepro.findByProjectName(name);
+        List<JiraProject> proj = projectRepo.findByProjectName(name);
         if (proj.size() == 1) {
             return proj.get(0);
         }
         return null;
     }
 
-    public Map<String, WorkLogEntry> loadWorkLog(Integer lastDays) {
-        List<WorkLog> workLogs = this.worklogRepro.findByCreationDate(ZonedDateTime.now().minusDays(lastDays));
+    public Map<String, WorkLogEntry> loadWorkLog(Integer lastDays, String user) {
+        ZonedDateTime dateTime = ZonedDateTime.now().minusDays(lastDays);
+        List<WorkLog> workLogs;
+        if (StringUtils.isEmpty(user)) {
+            workLogs = this.worklogRepo.findByCreationDate(dateTime);
+        } else {
+            workLogs = this.worklogRepo.findByAuthorAndCreationDate(user, dateTime);
+        }
         workLogs.forEach(this::loadIssue);
         Map<String, WorkLogEntry> logMap = new HashMap<>();
         workLogs.forEach(wl -> cumulateHours(wl, logMap));
@@ -64,16 +71,16 @@ public class PostgreSqlService {
     }
 
     private void loadIssue(WorkLog workLog) {
-        Optional<JiraIssue> issueOpt = issueRepro.findById(workLog.getIssueid());
+        Optional<JiraIssue> issueOpt = issueRepo.findById(workLog.getIssueid());
         if (issueOpt.isPresent()) {
             JiraIssue issue = issueOpt.get();
             workLog.setIssue(issue);
-            Optional<JiraProject> projectOpt = projectRepro.findById(Long.valueOf(issue.getProject()));
+            Optional<JiraProject> projectOpt = projectRepo.findById(Long.valueOf(issue.getProject()));
             if (projectOpt.isPresent()) {
                 issue.setJiraProject(projectOpt.get());
             }
             if (issue.getComponent() != null) {
-                Optional<JiraComponent> componentOpt = componentRepro.findById(issue.getComponent());
+                Optional<JiraComponent> componentOpt = componentRepo.findById(issue.getComponent());
                 if (componentOpt.isPresent()) {
                     issue.setJiraComponent(componentOpt.get());
                 }
