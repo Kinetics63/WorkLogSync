@@ -92,11 +92,10 @@ public class OracleService {
             istStunden.setFreigabe(0);
             istStunden.setLocked(0);
           }
-          // filter RW just for the demo
-          if (workLogEntry.getAuthor().equalsIgnoreCase("rw")) {
-            setHoursByReflection(workLogEntry.getAuthor(), workLogEntry.getDay(), istStunden, workLogEntry.getHours(),
+
+          setHoursByReflection(workLogEntry.getAuthor(), workLogEntry.getDay(), istStunden, workLogEntry.getHours(),
                 workLogEntry.getJiraProjectName() + " (" + subProjectLang + ")", logList);
-          }
+
         }
       }
     }
@@ -119,7 +118,7 @@ public class OracleService {
         logList.add("update     : " + logStr);
 
       } else {
-        logList.add("not updated: " + logStr);
+        logList.add("not updated (worklog already recorded): " + logStr);
       }
     } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
       throw new WorkLogSyncException("Reflection problem occurred", e);
