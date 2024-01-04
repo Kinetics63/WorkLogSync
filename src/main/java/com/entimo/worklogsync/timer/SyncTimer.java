@@ -1,12 +1,11 @@
 package com.entimo.worklogsync.timer;
 
 import com.entimo.worklogsync.service.AppController;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.TimerTask;
 
-@Log4j2
+@Slf4j
 public class SyncTimer  extends TimerTask {
 
     private final AppController controller;

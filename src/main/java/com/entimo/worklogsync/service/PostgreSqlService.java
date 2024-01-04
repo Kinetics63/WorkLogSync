@@ -6,12 +6,12 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 import com.entimo.worklogsync.utile.WorkLogEntry;
-import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 @Service
-@Log4j2
+@Slf4j
 public class PostgreSqlService {
 
     private WorkLogRepository worklogRepo;

@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8084
 spring:
   application:
     name: "worklog-database-sync"
@@ -11,13 +11,13 @@ spring:
         connectionTimeout: 20000
         idleTimeout: 600000
         maxLifetime: 1800000
-      url: jdbc:postgresql://tibia.entimo.de:5432/jiradb
+      url: jdbc:postgresql://amelix.entimo.de:5432/jiradb
       username: postgres
       password: entimo1
     pep: # PEP Datasource
       driver-class-name: oracle.jdbc.driver.OracleDriver
       url: jdbc:oracle:thin:@pepe.entimo.de:1521/pep.entimo.de
-      username: system
+      username: SYSTEM
       password: manager1
   jpa:
     hibernate:
@@ -38,7 +38,13 @@ springdoc:
 
 logging:
   pattern:
-    console: "%clr(%d{yyyy-MM-dd HH:mm:ss}){faint} %clr(%5p) %clr(---){faint} %clr(%55C{1}[%-4L]){cyan} %clr(:) %m%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss} %5p --- %55C{1}[%-4L] : %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} %5p --- %55C{1}[%-4L] : %m%n"
+  file:
+    name: ./WorkLogSyncApp.log
+  logback:
+    rollingpolicy:
+      max-file-size: 1024KB
   level:
     root: ERROR
     com.entimo.worklogsync: INFO
@@ -57,6 +63,9 @@ timer:
   timerSyncPeriod: 60
 # sync only once per day at 12p - the sync period will be ignored
   syncOncePerDay: true
+
+#
+shutdownAfterSync: true
 
 # number of last days to check for work logs in one scan
 daysToScan: 21
