@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
+import java.util.List;
 import lombok.Data;
 
 import java.time.ZonedDateTime;
@@ -36,4 +37,7 @@ public class JiraIssue {
 
   @Transient
   JiraComponent jiraComponent;
+
+  @Transient
+  List<Label> label;
 }

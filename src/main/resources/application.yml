@@ -11,9 +11,9 @@ spring:
         connectionTimeout: 20000
         idleTimeout: 600000
         maxLifetime: 1800000
-      url: jdbc:postgresql://amelix.entimo.de:5432/jiradb
-      username: postgres
-      password: entimo1
+      url: jdbc:postgresql://appendix.entimo.de:5432/jiradb
+      username: jira_readonly
+      password: Entimo_2026#!
     pep: # PEP Datasource
       driver-class-name: oracle.jdbc.driver.OracleDriver
       url: jdbc:oracle:thin:@pepe.entimo.de:1521/pep.entimo.de
@@ -47,7 +47,7 @@ logging:
       max-file-size: 1024KB
   level:
     root: ERROR
-    com.entimo.worklogsync: INFO
+    com.entimo.worklogsync: DEBUG
     org.springframework.boot: ERROR
     org.springframework.web: ERROR
     org.hibernate: ERROR
@@ -68,4 +68,4 @@ timer:
 shutdownAfterSync: true
 
 # number of last days to check for work logs in one scan
-daysToScan: 21
+daysToScan: 4

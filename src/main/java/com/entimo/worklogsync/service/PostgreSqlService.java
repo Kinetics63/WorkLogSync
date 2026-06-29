@@ -8,6 +8,7 @@ import java.util.*;
 import com.entimo.worklogsync.utile.WorkLogEntry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,13 +19,16 @@ public class PostgreSqlService {
     private JiraProjectRepository projectRepo;
     private JiraIssueRepository issueRepo;
     private JiraComponentRepository componentRepo;
+    private LabelRepository labelRepo;
 
     public PostgreSqlService(WorkLogRepository worklogRepro, JiraIssueRepository issueRepro
-            , JiraProjectRepository projectRepro, JiraComponentRepository componentRepro) {
+            , JiraProjectRepository projectRepro, JiraComponentRepository componentRepro,
+              LabelRepository labelRepo) {
         this.worklogRepo = worklogRepro;
         this.issueRepo = issueRepro;
         this.projectRepo = projectRepro;
         this.componentRepo = componentRepro;
+        this.labelRepo = labelRepo;
     }
 
     public JiraProject loadProject(String name) {
@@ -85,8 +89,14 @@ public class PostgreSqlService {
                     issue.setJiraComponent(componentOpt.get());
                 }
             }
+
+            Label exampleLabel = new Label();
+            exampleLabel.setIssue(issue.getId());
+            List<Label> all = labelRepo.findAll(Example.of(exampleLabel));
+            issue.setLabel(all);
             log.debug("USER: " + workLog.getAuthor() + " DATE: " + workLog.getStartdate() + " TIME: " + workLog.getTimeworked() + " ISSUE: " + issue.getSummary());
-            log.debug("   COMPONENT:" + (issue.getJiraComponent() != null ? issue.getJiraComponent().getName() : " ??? ") + "   PROJECT: " + (issue.getJiraProject() != null ? issue.getJiraProject().getPname() : " ??? "));
+            log.debug("  COMPONENT:" + (issue.getJiraComponent() != null ? issue.getJiraComponent().getName() : " ??? ") + "  PROJECT: " + (issue.getJiraProject() != null ? issue.getJiraProject().getPname() : " ??? "));
+            log.debug("  LABEL: "+all);
         }
     }
 }
