@@ -93,6 +93,9 @@ public class PostgreSqlService {
             Label exampleLabel = new Label();
             exampleLabel.setIssue(issue.getId());
             List<Label> all = labelRepo.findAll(Example.of(exampleLabel));
+            if(all.size()==0) {
+                all = labelRepo.findByParentIssue(issue.getId());
+            }
             issue.setLabel(all);
             // set Pep project ID
             log.debug("USER: " + workLog.getAuthor() + " DATE: " + workLog.getStartdate() + " TIME: " + workLog.getTimeworked() + " ISSUE: " + issue.getSummary());
