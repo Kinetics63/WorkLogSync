@@ -84,10 +84,10 @@ public class OracleService {
         subProjectIdTemp = pepProject.getId();
         subProjecktKurzTemp = pepProject.getKurz();
       } else {
-        String pepProjecktLang = ProjectUtil.mapJiraToPep(workLogEntry.getJiraProjectName());
         subProjecktKurzTemp = ProjectUtil.mapJiraToPepKurz(workLogEntry.getJiraProjectName());
         // Jira project not mapped to PEP
         if (!StringUtils.isEmpty(subProjecktKurzTemp)) {
+          String pepProjecktLang = ProjectUtil.mapJiraToPep(workLogEntry.getJiraProjectName());
           List<PepProject> pepProjList = projectRepo.findByProjLangAndKurz(pepProjecktLang,
               subProjecktKurzTemp);
 
@@ -107,7 +107,7 @@ public class OracleService {
 
       if (pepSubProject.isEmpty()) {
         String str = StringUtils.isEmpty(subProjectLang)?workLogEntry.getJiraProjectName():subProjectLang;
-        logList.add("PEP project (" + str + ") not assigned to user "
+        logList.add("PEP project (" + str +" / "+subProjecktKurz+ ") not assigned to user "
             + workLogEntry.getAuthor());
       } else {
         Long pepUserKennNr = byPerskurz.get(0).getKennummer();

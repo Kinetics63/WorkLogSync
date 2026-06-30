@@ -59,7 +59,7 @@ public class ProjectUtil {
             case JIRA_DOCUMENTATION:
                 return PEP_DOCUMENTATION_USERGUID;
             default:
-                log.debug("Project {} not mapped to PEP or no Label found!", jiraProjectName);
+                log.debug("Project {} not mapped to PEP or no Jira-Label assigned!", jiraProjectName);
                 break;
         }
         return "";
@@ -73,7 +73,7 @@ public class ProjectUtil {
             case JIRA_DOCUMENTATION:
                 return PEP_DOCUMENTATION;
             default:
-                log.debug("Project {} not mapped to PEP or no Label found!", jiraProjectName);
+                log.debug("Project {} not mapped to PEP or no Jira-Label assigned!", jiraProjectName);
                 break;
         }
         return "";
