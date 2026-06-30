@@ -68,4 +68,4 @@ timer:
 shutdownAfterSync: true
 
 # number of last days to check for work logs in one scan
-daysToScan: 4
+daysToScan: 7

@@ -15,6 +15,14 @@ public interface PepProjectRepository extends JpaRepository<PepProject, Long> {
   @Query(
       value = "select p.* "
           + "from PEP.PROJEKT c, PEP.PROJEKT p "
+          + "where UPPER(p.PRJ_KURZ) = UPPER(:projKurz) "
+          + "and p.PRJ_PRJ_PARENT_ID = c.PRJ_ID ",
+      nativeQuery = true)
+  List<PepProject> findByProjKurz(String projKurz);
+
+  @Query(
+      value = "select p.* "
+          + "from PEP.PROJEKT c, PEP.PROJEKT p "
           + "where UPPER(c.PRJ_LANG)=UPPER(:projLang) "
           + "and UPPER(p.PRJ_KURZ) = UPPER(:projKurz) "
           + "and p.PRJ_PRJ_PARENT_ID = c.PRJ_ID ",

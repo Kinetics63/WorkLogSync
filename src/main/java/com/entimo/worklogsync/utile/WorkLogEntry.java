@@ -1,6 +1,8 @@
 package com.entimo.worklogsync.utile;
 
+import com.entimo.worklogsync.postgresql.data.Label;
 import com.entimo.worklogsync.postgresql.data.WorkLog;
+import java.util.List;
 import lombok.Data;
 
 @Data
@@ -11,6 +13,7 @@ public class WorkLogEntry {
     private Long jiraProjectId;
     private String jiraProjectName;
     private Long pepProjectId;
+    private List<Label> labelList;
 
     private Float hours;
 
@@ -26,5 +29,6 @@ public class WorkLogEntry {
         year = workLog.getStartdate().getYear();
         month = workLog.getStartdate().getMonthValue();
         day = workLog.getStartdate().getDayOfMonth();
+        labelList = workLog.getIssue().getLabel();
     }
 }

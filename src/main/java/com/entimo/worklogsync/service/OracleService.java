@@ -7,15 +7,14 @@ import com.entimo.worklogsync.oracle.data.KstGruppe;
 import com.entimo.worklogsync.oracle.data.KstGruppeRepository;
 import com.entimo.worklogsync.oracle.data.PepProject;
 import com.entimo.worklogsync.oracle.data.PepProjectRepository;
-
+import com.entimo.worklogsync.postgresql.data.Label;
 import com.entimo.worklogsync.utile.ProjectUtil;
-
+import com.entimo.worklogsync.utile.WorkLogEntry;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
-import java.util.*;
-
-import com.entimo.worklogsync.utile.WorkLogEntry;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,21 @@ public class OracleService {
     this.istStundenRepo = istStundenRepo;
   }
 
+  private Optional<PepProject> loadProjectByLabel(List<Label> labelList) {
+    for (Label label : labelList) {
+      PepProject pepProject = loadProject(null, label.getLabel());
+      if (pepProject != null) {
+        return Optional.of(pepProject);
+      }
+    }
+    return Optional.empty();
+  }
+
   public PepProject loadProject(String projLang, String projKurz) {
+    List<PepProject> subProj = projectRepo.findByProjKurz(projKurz);
+    if (subProj.size() == 1) {
+      return subProj.get(0);
+    }
     List<PepProject> proj = projectRepo.findByProjLangAndKurz(projLang, projKurz);
     if (proj.size() == 1) {
       return proj.get(0);
@@ -55,48 +68,73 @@ public class OracleService {
   }
 
   public void processWorkLog(WorkLogEntry workLogEntry, List<String> logList) {
-    List<KstGruppe> byPerskurz = kstGruppeRepo.findByPerskurz(workLogEntry.getAuthor().toUpperCase());
+    List<KstGruppe> byPerskurz = kstGruppeRepo.findByPerskurz(
+        workLogEntry.getAuthor().toUpperCase());
     if (byPerskurz.isEmpty()) {
       log.debug("User {} not found in PEP!", workLogEntry.getAuthor());
     } else {
-      String pepProjecktLang = ProjectUtil.mapJiraToPep(workLogEntry.getJiraProjectName());
-      String pepSubProjecktKurz = ProjectUtil.mapJiraToPepKurz(workLogEntry.getJiraProjectName());
-      // Jira project not mapped to PEP
-      if (!StringUtils.isEmpty(pepSubProjecktKurz)) {
-        List<PepProject> pepProjList = projectRepo.findByProjLangAndKurz(pepProjecktLang, pepSubProjecktKurz);
-        String subProjectLang = pepProjList.isEmpty() ? "???" : pepProjList.get(0).getLang();
-        Long subProjectId = pepProjList.isEmpty() ? null : pepProjList.get(0).getId();
+      String subProjectLang = "";
+      Long subProjectIdTemp = null;
+      String subProjecktKurzTemp = "";
+      Optional<PepProject> projectOpt = loadProjectByLabel(workLogEntry.getLabelList());
+      if (projectOpt.isPresent()) {
+        PepProject pepProject = projectOpt.get();
+        log.debug("PEP project {} found by label: {}}", projectOpt.get().getKurz(), projectOpt.get().getLang());
+        subProjectLang = pepProject.getLang();
+        subProjectIdTemp = pepProject.getId();
+        subProjecktKurzTemp = pepProject.getKurz();
+      } else {
+        String pepProjecktLang = ProjectUtil.mapJiraToPep(workLogEntry.getJiraProjectName());
+        subProjecktKurzTemp = ProjectUtil.mapJiraToPepKurz(workLogEntry.getJiraProjectName());
+        // Jira project not mapped to PEP
+        if (!StringUtils.isEmpty(subProjecktKurzTemp)) {
+          List<PepProject> pepProjList = projectRepo.findByProjLangAndKurz(pepProjecktLang,
+              subProjecktKurzTemp);
 
-        //find pep Project for JiraProject
-        List<PepProject> pepProjects = projectRepo.loadProjectForUser(workLogEntry.getAuthor(), pepSubProjecktKurz);
-        // check if subproject assigned to user
-        Optional<PepProject> pepSubProject = pepProjects.stream().filter(h -> Objects.equals(h.getKurz(), pepSubProjecktKurz)).findFirst();
-        if (pepSubProject.isEmpty()) {
-          logList.add("PEP project ("+subProjectLang+") not assigned to user " + workLogEntry.getAuthor());
-        } else {
-          Long pepUserKennNr = byPerskurz.get(0).getKennummer();
-          List<IstStunden> pepIstStundenList = istStundenRepo.findByUserMonthYear(pepUserKennNr, workLogEntry.getMonth(), workLogEntry.getYear());
-          Optional<IstStunden> pepIstStunden = pepIstStundenList.stream().filter(h -> Objects.equals(h.getPrjid(), subProjectId)).findFirst();
-          IstStunden istStunden;
-          if (pepIstStunden.isPresent()) {
-            istStunden = pepIstStunden.get();
-          } else {
-            istStunden = new IstStunden();
-            // get oracle sequence for table IstStunden
-            Long sequence = istStundenRepo.getSequence();
-            istStunden.setId(sequence);
-            istStunden.setKennummer(pepUserKennNr);
-            istStunden.setPrjid(subProjectId);
-            istStunden.setMonth(workLogEntry.getMonth());
-            istStunden.setYear(workLogEntry.getYear());
-            istStunden.setFreigabe(0);
-            istStunden.setLocked(0);
-          }
-
-          setHoursByReflection(workLogEntry.getAuthor(), workLogEntry.getDay(), istStunden, workLogEntry.getHours(),
-                workLogEntry.getJiraProjectName() + " (" + subProjectLang + ")", logList);
-
+          subProjectLang = pepProjList.isEmpty() ? "???" : pepProjList.get(0).getLang();
+          subProjectIdTemp = pepProjList.isEmpty() ? null : pepProjList.get(0).getId();
         }
+      }
+
+      Long subProjectId = subProjectIdTemp;
+      String subProjecktKurz = subProjecktKurzTemp;
+      //find pep Project for user / JiraProject
+      List<PepProject> pepProjects = projectRepo.loadProjectForUser(workLogEntry.getAuthor(),
+          subProjecktKurz);
+      // check if subproject assigned to user
+      Optional<PepProject> pepSubProject = pepProjects.stream()
+          .filter(h -> Objects.equals(h.getKurz(), subProjecktKurz)).findFirst();
+
+      if (pepSubProject.isEmpty()) {
+        String str = StringUtils.isEmpty(subProjectLang)?workLogEntry.getJiraProjectName():subProjectLang;
+        logList.add("PEP project (" + str + ") not assigned to user "
+            + workLogEntry.getAuthor());
+      } else {
+        Long pepUserKennNr = byPerskurz.get(0).getKennummer();
+        List<IstStunden> pepIstStundenList = istStundenRepo.findByUserMonthYear(pepUserKennNr,
+            workLogEntry.getMonth(), workLogEntry.getYear());
+        Optional<IstStunden> pepIstStunden = pepIstStundenList.stream()
+            .filter(h -> Objects.equals(h.getPrjid(), subProjectId)).findFirst();
+        IstStunden istStunden;
+        if (pepIstStunden.isPresent()) {
+          istStunden = pepIstStunden.get();
+        } else {
+          istStunden = new IstStunden();
+          // get oracle sequence for table IstStunden
+          Long sequence = istStundenRepo.getSequence();
+          istStunden.setId(sequence);
+          istStunden.setKennummer(pepUserKennNr);
+          istStunden.setPrjid(subProjectId);
+          istStunden.setMonth(workLogEntry.getMonth());
+          istStunden.setYear(workLogEntry.getYear());
+          istStunden.setFreigabe(0);
+          istStunden.setLocked(0);
+        }
+if (false) {
+          setHoursByReflection(workLogEntry.getAuthor(), workLogEntry.getDay(), istStunden,
+              workLogEntry.getHours(),
+              workLogEntry.getJiraProjectName() + " (" + subProjectLang + ")", logList);
+}
       }
     }
   }

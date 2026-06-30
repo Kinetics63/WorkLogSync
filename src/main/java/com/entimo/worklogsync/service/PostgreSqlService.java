@@ -94,9 +94,9 @@ public class PostgreSqlService {
             exampleLabel.setIssue(issue.getId());
             List<Label> all = labelRepo.findAll(Example.of(exampleLabel));
             issue.setLabel(all);
+            // set Pep project ID
             log.debug("USER: " + workLog.getAuthor() + " DATE: " + workLog.getStartdate() + " TIME: " + workLog.getTimeworked() + " ISSUE: " + issue.getSummary());
-            log.debug("  COMPONENT:" + (issue.getJiraComponent() != null ? issue.getJiraComponent().getName() : " ??? ") + "  PROJECT: " + (issue.getJiraProject() != null ? issue.getJiraProject().getPname() : " ??? "));
-            log.debug("  LABEL: "+all);
+            log.debug("  COMPONENT:" + (issue.getJiraComponent() != null ? issue.getJiraComponent().getName() : " ??? ") + "  PROJECT: " + (issue.getJiraProject() != null ? issue.getJiraProject().getPname() : " ??? ") + "  LABEL: "+all);
         }
     }
 }

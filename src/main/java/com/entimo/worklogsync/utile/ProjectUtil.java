@@ -5,6 +5,7 @@ import com.entimo.worklogsync.postgresql.data.JiraProject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class ProjectUtil {
 
@@ -38,6 +39,10 @@ public class ProjectUtil {
         jiraProjects = new HashMap<>();
     }
 
+    public static Optional<PepProject> findPepProject(WorkLogEntry workLogEntry) {
+      return Optional.empty();
+    }
+
     public void addJiraProject(JiraProject pro) {
         jiraProjects.put(pro.getPname(), pro.getId());
     }
@@ -54,7 +59,7 @@ public class ProjectUtil {
             case JIRA_DOCUMENTATION:
                 return PEP_DOCUMENTATION_USERGUID;
             default:
-                log.debug("Project {} not mapped to PEP!", jiraProjectName);
+                log.debug("Project {} not mapped to PEP or no Label found!", jiraProjectName);
                 break;
         }
         return "";
@@ -68,7 +73,7 @@ public class ProjectUtil {
             case JIRA_DOCUMENTATION:
                 return PEP_DOCUMENTATION;
             default:
-                log.debug("Project {} not mapped to PEP!", jiraProjectName);
+                log.debug("Project {} not mapped to PEP or no Label found!", jiraProjectName);
                 break;
         }
         return "";
