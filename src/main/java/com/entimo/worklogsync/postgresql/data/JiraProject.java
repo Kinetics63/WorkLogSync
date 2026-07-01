@@ -14,4 +14,5 @@ public class JiraProject {
   private Long id;
   private String pname;
   private String description;
+  private String pkey;
 }

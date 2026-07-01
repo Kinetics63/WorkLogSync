@@ -12,7 +12,7 @@ public class WorkLogEntry {
 
     private Long jiraProjectId;
     private String jiraProjectName;
-    private Long pepProjectId;
+    private String jiraIssueKey;
     private List<Label> labelList;
 
     private Float hours;
@@ -30,5 +30,6 @@ public class WorkLogEntry {
         month = workLog.getStartdate().getMonthValue();
         day = workLog.getStartdate().getDayOfMonth();
         labelList = workLog.getIssue().getLabel();
+        jiraIssueKey = workLog.getIssue().getPkey()+"-"+workLog.getIssue().getIssuenum();
     }
 }

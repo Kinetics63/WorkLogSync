@@ -88,7 +88,7 @@ public class AppController {
     projectUtil.addPepProject(pepService.loadProject(ProjectUtil.PEP_DOCUMENTATION, ProjectUtil.PEP_DOCUMENTATION_USERGUID));
     projectUtil.addPepProject(pepService.loadProject(ProjectUtil.PEP_NEXTGEN, ProjectUtil.PEP_NEXTGEN_DEV));
 
-    startSync(daysToScan, "sto");
+    startSync(daysToScan, null);
   }
 
   @Operation(summary = "Start synchronisation from Jira work logs to PEP.")

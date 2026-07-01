@@ -79,7 +79,8 @@ public class OracleService {
       Optional<PepProject> projectOpt = loadProjectByLabel(workLogEntry.getLabelList());
       if (projectOpt.isPresent()) {
         PepProject pepProject = projectOpt.get();
-        log.debug("PEP project {} found by label: {}}", projectOpt.get().getKurz(), projectOpt.get().getLang());
+        log.debug("PEP project {} found by label: {}", projectOpt.get().getKurz(),
+            projectOpt.get().getLang());
         subProjectLang = pepProject.getLang();
         subProjectIdTemp = pepProject.getId();
         subProjecktKurzTemp = pepProject.getKurz();
@@ -96,6 +97,11 @@ public class OracleService {
         }
       }
 
+      if (StringUtils.isEmpty(subProjecktKurzTemp)) {
+        logList.add("No PEP subproject found for Jira issue: " + workLogEntry.getJiraIssueKey());
+        return;
+      }
+
       Long subProjectId = subProjectIdTemp;
       String subProjecktKurz = subProjecktKurzTemp;
       //find pep Project for user / JiraProject
@@ -106,8 +112,9 @@ public class OracleService {
           .filter(h -> Objects.equals(h.getKurz(), subProjecktKurz)).findFirst();
 
       if (pepSubProject.isEmpty()) {
-        String str = StringUtils.isEmpty(subProjectLang)?workLogEntry.getJiraProjectName():subProjectLang;
-        logList.add("PEP project (" + str +" / "+subProjecktKurz+ ") not assigned to user "
+        String str = StringUtils.isEmpty(subProjectLang) ? workLogEntry.getJiraProjectName()
+            : subProjectLang;
+        logList.add("PEP project (" + str + ") not assigned to user "
             + workLogEntry.getAuthor());
       } else {
         Long pepUserKennNr = byPerskurz.get(0).getKennummer();
@@ -130,11 +137,9 @@ public class OracleService {
           istStunden.setFreigabe(0);
           istStunden.setLocked(0);
         }
-if (false) {
-          setHoursByReflection(workLogEntry.getAuthor(), workLogEntry.getDay(), istStunden,
-              workLogEntry.getHours(),
-              workLogEntry.getJiraProjectName() + " (" + subProjectLang + ")", logList);
-}
+        setHoursByReflection(workLogEntry.getAuthor(), workLogEntry.getDay(), istStunden,
+            workLogEntry.getHours(),
+            workLogEntry.getJiraProjectName() + " (" + subProjectLang + ") / JiraIssue: "+workLogEntry.getJiraIssueKey(), logList);
       }
     }
   }

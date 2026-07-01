@@ -57,7 +57,7 @@ public class PostgreSqlService {
         if (log.isDebugEnabled()) {
             Set<String> set = new TreeSet<>();
             workLogs.forEach(w -> set.add(w.getJiraProjectName()));
-            log.debug("found jira projects:");
+            log.debug("Found jira projects:");
             set.forEach(s -> log.info("   " + s));
         }
         return logMap;
@@ -82,6 +82,7 @@ public class PostgreSqlService {
             Optional<JiraProject> projectOpt = projectRepo.findById(Long.valueOf(issue.getProject()));
             if (projectOpt.isPresent()) {
                 issue.setJiraProject(projectOpt.get());
+                issue.setPkey(projectOpt.get().getPkey());
             }
             if (issue.getComponent() != null) {
                 Optional<JiraComponent> componentOpt = componentRepo.findById(issue.getComponent());

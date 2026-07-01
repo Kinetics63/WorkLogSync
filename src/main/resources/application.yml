@@ -47,7 +47,7 @@ logging:
       max-file-size: 1024KB
   level:
     root: ERROR
-    com.entimo.worklogsync: DEBUG
+    com.entimo.worklogsync: INFO
     org.springframework.boot: ERROR
     org.springframework.web: ERROR
     org.hibernate: ERROR
@@ -68,4 +68,4 @@ timer:
 shutdownAfterSync: true
 
 # number of last days to check for work logs in one scan
-daysToScan: 40
+daysToScan: 2
